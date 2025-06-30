@@ -684,28 +684,36 @@ components:
       properties:
         companyId:
           type: integer
-          description: Associated company ID
+          minimum: 1
+          description: Associated company ID (must be a positive integer)
         interviewFlowId:
           type: integer
-          description: Associated interview flow ID
+          minimum: 1
+          description: Associated interview flow ID (must be a positive integer)
         title:
           type: string
-          description: Position title
+          maxLength: 100
+          minLength: 1
+          description: Position title (required, 1-100 characters)
         description:
           type: string
-          description: Position description
+          minLength: 1
+          description: Position description (required, cannot be empty)
         status:
           type: string
-          description: Position status
+          enum: [Open, Contratado, Cerrado, Borrador]
+          description: Position status (must be one of the valid status values)
         isVisible:
           type: boolean
           description: Whether position is visible to candidates
         location:
           type: string
-          description: Position location
+          minLength: 1
+          description: Position location (required, cannot be empty)
         jobDescription:
           type: string
-          description: Detailed job description
+          minLength: 1
+          description: Detailed job description (required, cannot be empty)
         requirements:
           type: string
           nullable: true
@@ -716,12 +724,14 @@ components:
           description: Position responsibilities
         salaryMin:
           type: number
+          minimum: 0
           nullable: true
-          description: Minimum salary
+          description: Minimum salary (must be >= 0, cannot be greater than salaryMax)
         salaryMax:
           type: number
+          minimum: 0
           nullable: true
-          description: Maximum salary
+          description: Maximum salary (must be >= 0, cannot be less than salaryMin)
         employmentType:
           type: string
           nullable: true
@@ -738,7 +748,7 @@ components:
           type: string
           format: date-time
           nullable: true
-          description: Application deadline
+          description: Application deadline (must be a future date)
         contactInfo:
           type: string
           nullable: true

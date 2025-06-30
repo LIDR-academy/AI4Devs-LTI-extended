@@ -9,11 +9,18 @@ Represents a job candidate who can apply for positions within the system.
 
 **Fields:**
 - `id`: Unique identifier for the candidate (Primary Key)
-- `firstName`: Candidate's first name
-- `lastName`: Candidate's last name  
-- `email`: Candidate's unique email address
-- `phone`: Candidate's phone number (optional)
-- `address`: Candidate's address (optional)
+- `firstName`: Candidate's first name (max 100 characters)
+- `lastName`: Candidate's last name (max 100 characters)
+- `email`: Candidate's unique email address (max 255 characters)
+- `phone`: Candidate's phone number (optional, max 15 characters)
+- `address`: Candidate's address (optional, max 100 characters)
+
+**Validation Rules:**
+- First name and last name are required, 2-100 characters, letters only
+- Email is required, must be unique, and follow valid email format
+- Phone is optional but must follow Spanish format (6|7|9)XXXXXXXX if provided
+- Address is optional but cannot exceed 100 characters
+- Maximum of 3 education records per candidate
 
 **Relationships:**
 - `educations`: One-to-many relationship with Education model
@@ -26,11 +33,18 @@ Represents educational background information for candidates.
 
 **Fields:**
 - `id`: Unique identifier for the education record (Primary Key)
-- `institution`: Name of the educational institution
-- `title`: Degree or certification title obtained
+- `institution`: Name of the educational institution (max 100 characters)
+- `title`: Degree or certification title obtained (max 250 characters)
 - `startDate`: Start date of the education period
 - `endDate`: End date of the education period (optional, null if ongoing)
 - `candidateId`: Foreign key referencing the Candidate
+
+**Validation Rules:**
+- Institution is required and cannot exceed 100 characters
+- Title is required and cannot exceed 250 characters
+- Start date is required and must be in valid date format
+- End date is optional but must be valid if provided
+- Maximum of 3 education records per candidate
 
 **Relationships:**
 - `candidate`: Many-to-one relationship with Candidate model
@@ -40,12 +54,19 @@ Represents work history and professional experience for candidates.
 
 **Fields:**
 - `id`: Unique identifier for the work experience record (Primary Key)
-- `company`: Name of the company or organization
-- `position`: Job title or position held
-- `description`: Description of responsibilities and achievements (optional)
+- `company`: Name of the company or organization (max 100 characters)
+- `position`: Job title or position held (max 100 characters)
+- `description`: Description of responsibilities and achievements (optional, max 200 characters)
 - `startDate`: Start date of the work experience
 - `endDate`: End date of the work experience (optional, null if current)
 - `candidateId`: Foreign key referencing the Candidate
+
+**Validation Rules:**
+- Company name is required and cannot exceed 100 characters
+- Position is required and cannot exceed 100 characters
+- Description is optional but cannot exceed 200 characters if provided
+- Start date is required and must be in valid date format
+- End date is optional but must be valid if provided
 
 **Relationships:**
 - `candidate`: Many-to-one relationship with Candidate model
@@ -55,10 +76,16 @@ Represents uploaded resume files associated with candidates.
 
 **Fields:**
 - `id`: Unique identifier for the resume record (Primary Key)
-- `filePath`: File system path to the uploaded resume
-- `fileType`: MIME type or file extension of the resume
+- `filePath`: File system path to the uploaded resume (max 500 characters)
+- `fileType`: MIME type or file extension of the resume (max 50 characters)
 - `uploadDate`: Date and time when the resume was uploaded
 - `candidateId`: Foreign key referencing the Candidate
+
+**Validation Rules:**
+- File path is required and cannot exceed 500 characters
+- File type is required and cannot exceed 50 characters
+- Upload date is automatically set when file is uploaded
+- Supported file types: PDF and DOCX (max 10MB)
 
 **Relationships:**
 - `candidate`: Many-to-one relationship with Candidate model
@@ -132,23 +159,31 @@ Represents job positions available for application.
 
 **Fields:**
 - `id`: Unique identifier for the position (Primary Key)
-- `title`: Job title
-- `description`: Brief description of the position
-- `status`: Current status of the position (e.g., "Open", "Closed", "On Hold")
-- `isVisible`: Boolean indicating if the position is publicly visible
-- `location`: Job location
-- `jobDescription`: Detailed job description
+- `companyId`: Foreign key referencing the Company (required)
+- `interviewFlowId`: Foreign key referencing the InterviewFlow (required)
+- `title`: Job title (required, max 100 characters)
+- `description`: Brief description of the position (required)
+- `status`: Current status of the position (default: "Draft", valid values: Open, Contratado, Cerrado, Borrador)
+- `isVisible`: Boolean indicating if the position is publicly visible (default: false)
+- `location`: Job location (required)
+- `jobDescription`: Detailed job description (required)
 - `requirements`: Job requirements and qualifications (optional)
 - `responsibilities`: Job responsibilities (optional)
-- `salaryMin`: Minimum salary range (optional)
-- `salaryMax`: Maximum salary range (optional)
+- `salaryMin`: Minimum salary range (optional, must be >= 0)
+- `salaryMax`: Maximum salary range (optional, must be >= 0 and >= salaryMin)
 - `employmentType`: Type of employment (e.g., "Full-time", "Part-time", "Contract") (optional)
 - `benefits`: Job benefits description (optional)
 - `companyDescription`: Description of the hiring company (optional)
-- `applicationDeadline`: Deadline for applications (optional)
+- `applicationDeadline`: Deadline for applications (optional, must be a future date)
 - `contactInfo`: Contact information for inquiries (optional)
-- `companyId`: Foreign key referencing the Company
-- `interviewFlowId`: Foreign key referencing the InterviewFlow
+
+**Validation Rules:**
+- Title is required and cannot exceed 100 characters
+- Description, location, and jobDescription are required fields
+- Status must be one of: Open, Contratado, Cerrado, Borrador
+- Company and interview flow references must exist in the database
+- Salary values must be non-negative numbers
+- Application deadline must be a future date if provided
 
 **Relationships:**
 - `company`: Many-to-one relationship with Company model

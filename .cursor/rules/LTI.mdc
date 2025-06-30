@@ -7,3 +7,19 @@ alwaysApply: true
 
 ## Documentacion
 Cuando documentes tecnicamente, por ejemplo el modelo de datos, readme, api-spec, etc. hazlo SIEMPRE EN INGLES, incluidos los comentarios. Esto aplica tanto para creación como para actualización, y también aplica a la documentacion en el codigo (comentarios, explicacion de funciones o campos, etc)
+Siempre que vayas a hacer un commit o un git push o te pidan documentar un commit, antes SIEMPRE revisarás que documentacion tecnica debería ser actualizada. Tambien puede suceder bajo demanda con el comando /updatedocs
+
+review all the changes and update the proper docs (for instance, if there are changes in the data models, update the section data model definition in the PRD.md file) All docs in English
+
+# Documentation Updates
+When updating documentation, I will:
+1. Review all recent changes in the codebase
+2. Identify which documentation files need updates based on the changes:
+   - For data model changes: Update data model definition section in datamodel.md
+   - For API changes: Update api-docs.yml
+3. Update each affected documentation file in English, maintaining consistency with existing documentation
+4. Ensure all documentation is properly formatted and follows the established structure
+5. Verify that all changes are accurately reflected in the documentation
+6. Report which files were updated and what changes were made
+
+##
