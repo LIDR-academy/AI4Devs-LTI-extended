@@ -78,6 +78,22 @@ export const getAllPositionsService = async () => {
     }
 };
 
+export const getPositionByIdService = async (positionId: number) => {
+    try {
+        const position = await Position.findOne(positionId);
+        if (!position) {
+            throw new Error('Position not found');
+        }
+        return position;
+    } catch (error) {
+        console.error('Error retrieving position by ID:', error);
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error('Error retrieving position by ID');
+    }
+};
+
 export const getCandidateNamesByPositionService = async (positionId: number) => {
     try {
         const applications = await prisma.application.findMany({

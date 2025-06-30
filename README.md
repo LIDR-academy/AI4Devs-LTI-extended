@@ -1,245 +1,313 @@
-# LTI - Sistema de Seguimiento de Talento
+# LTI (Learning Technology Initiative) - ATS System
 
-Este proyecto es una aplicación full-stack con un frontend en React y un backend en Express usando Prisma como un ORM. El frontend se inicia con Create React App y el backend está escrito en TypeScript.
+## 📋 Overview
 
-## Explicación de Directorios y Archivos
+The LTI ATS (Applicant Tracking System) is a modern, full-stack recruitment management platform designed to streamline the entire hiring process. This system enables organizations to efficiently manage candidates, track applications, organize interviews, and make data-driven hiring decisions.
 
-- `backend/`: Contiene el código del lado del servidor escrito en Node.js.
-  - `src/`: Contiene el código fuente para el backend.
-    - `index.ts`: El punto de entrada para el servidor backend.
-    - `application/`: Contiene la lógica de aplicación.
-    - `domain/`: Contiene la lógica de negocio.
-    - `infrastructure/`: Contiene código que se comunica con la base de datos.
-    - `presentation/`: Contiene código relacionado con la capa de presentación (como controladores).
-    - `routes/`: Contiene las definiciones de rutas para la API.
-    - `tests/`: Contiene archivos de prueba.
-  - `prisma/`: Contiene el archivo de esquema de Prisma para ORM.
-  - `tsconfig.json`: Archivo de configuración de TypeScript.
-- `frontend/`: Contiene el código del lado del cliente escrito en React.
-  - `src/`: Contiene el código fuente para el frontend.
-  - `public/`: Contiene archivos estáticos como el archivo HTML e imágenes.
-  - `build/`: Contiene la construcción lista para producción del frontend.
-- `.env`: Contiene las variables de entorno.
-- `docker-compose.yml`: Contiene la configuración de Docker Compose para gestionar los servicios de tu aplicación.
-- `README.md`: Este archivo, contiene información sobre el proyecto e instrucciones sobre cómo ejecutarlo.
+### 🎯 Purpose
 
-## Estructura del Proyecto
+The LTI ATS addresses critical challenges in modern recruitment by providing:
 
-El proyecto está dividido en dos directorios principales: `frontend` y `backend`.
+- **Centralized Candidate Management**: Comprehensive candidate profiles with education, work experience, and document storage
+- **Structured Interview Processes**: Customizable interview flows with multiple stages and evaluation criteria
+- **Application Tracking**: End-to-end visibility of candidate progress through hiring pipelines
+- **Collaborative Decision Making**: Multi-stakeholder interview coordination and evaluation tools
+- **Data-Driven Insights**: Analytics and reporting for recruitment process optimization
 
-### Frontend
+### 🏗️ Architecture
 
-El frontend es una aplicación React y sus archivos principales están ubicados en el directorio `src`. El directorio `public` contiene activos estáticos y el directorio `build` contiene la construcción de producción de la aplicación.
+The system follows **Domain-Driven Design (DDD)** principles with a clean, layered architecture:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Presentation Layer                       │
+│  ┌─────────────────────┐    ┌─────────────────────────────┐│
+│  │   React Frontend    │    │   Express.js Controllers    ││
+│  │   (TypeScript)      │    │      (REST API)             ││
+│  └─────────────────────┘    └─────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                   Application Layer                         │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │              Services & Use Cases                       ││
+│  │    (candidateService, positionService, etc.)            ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                     Domain Layer                            │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │  Domain Models & Business Logic                         ││
+│  │  (Candidate, Position, Application, Interview)          ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                  Infrastructure Layer                       │
+│  ┌─────────────────────┐    ┌─────────────────────────────┐│
+│  │   PostgreSQL        │    │      Prisma ORM             ││
+│  │   (Database)        │    │    (Data Access)            ││
+│  └─────────────────────┘    └─────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 🛠️ Technologies
 
 ### Backend
+- **Node.js** with **TypeScript** - Server-side runtime and type safety
+- **Express.js** - Web framework for REST API
+- **Prisma ORM** - Type-safe database client and migrations
+- **PostgreSQL** - Primary database for data persistence
+- **Jest** - Unit and integration testing framework
+- **Serverless Framework** - Cloud deployment capabilities
 
-El backend es una aplicación Express escrita en TypeScript. El directorio `src` contiene el código fuente, dividido en varios subdirectorios:
+### Frontend
+- **React 18** with **TypeScript** - Modern UI framework with type safety
+- **React Bootstrap** - UI component library
+- **React Router DOM** - Client-side routing
+- **React Beautiful DnD** - Drag and drop functionality for Kanban boards
+- **React DatePicker** - Date selection components
 
-- `application`: Contiene la lógica de aplicación.
-- `domain`: Contiene los modelos de dominio.
-- `infrastructure`: Contiene código relacionado con la infraestructura.
-- `presentation`: Contiene código relacionado con la capa de presentación.
-- `routes`: Contiene las rutas de la aplicación.
-- `tests`: Contiene las pruebas de la aplicación.
+### DevOps & Testing
+- **Docker** - Containerization for PostgreSQL database
+- **Cypress** - End-to-end testing framework
+- **ESLint** & **Prettier** - Code linting and formatting
 
-El directorio `prisma` contiene el esquema de Prisma.
+## 📁 Folder Structure
 
-You can find more information about best practices used in the [best practices guide](./backend/documentation/ManifestoBuenasPracticas.md).
-
-The specifications for all API endpoints are available in [api-spec.yaml](./backend/documentation/api-spec.yaml).
-
-The description and diagram of the data model are available in [DataModel.md](./backend/documentation/DataModel.md).
-
-
-## Primeros Pasos
-
-Para comenzar con este proyecto, sigue estos pasos:
-
-1. Clona el repositorio.
-2. Instala las dependencias para el frontend y el backend:
-```sh
-cd frontend
-npm install
-
-cd ../backend
-npm install
 ```
-3. Construye el servidor backend:
-```
-cd backend
-npm run build
-````
-4. Inicia el servidor backend:
-```
-cd backend
-npm start
-```
-5. En una nueva ventana de terminal, construye el servidor frontend:
-```
-cd frontend
-npm run build
-```
-6. Inicia el servidor frontend:
-```
-cd frontend
-npm start
+AI4Devs-LTI/
+├── 📁 backend/                      # Backend application
+│   ├── 📁 src/
+│   │   ├── 📁 presentation/         # Controllers & Routes
+│   │   │   ├── 📁 controllers/      # REST API controllers
+│   │   │   └── 📁 __tests__/        # Controller tests
+│   │   ├── 📁 application/          # Application services
+│   │   │   ├── 📁 services/         # Business logic services
+│   │   │   └── validator.ts         # Input validation
+│   │   ├── 📁 domain/               # Domain layer
+│   │   │   ├── 📁 models/           # Domain entities
+│   │   │   └── 📁 repositories/     # Repository interfaces
+│   │   ├── 📁 infrastructure/       # Infrastructure layer
+│   │   └── 📁 routes/               # API route definitions
+│   ├── 📁 prisma/                   # Database schema & migrations
+│   │   ├── schema.prisma            # Database schema definition
+│   │   ├── 📁 migrations/           # Database migration files
+│   │   └── seed.ts                  # Database seeding script
+│   ├── package.json                 # Backend dependencies
+│   ├── tsconfig.json               # TypeScript configuration
+│   └── jest.config.js              # Jest testing configuration
+│
+├── 📁 frontend/                     # React frontend application
+│   ├── 📁 src/
+│   │   ├── 📁 components/           # React components
+│   │   ├── 📁 services/            # API service layers
+│   │   ├── 📁 pages/               # Page components
+│   │   └── App.js                  # Main application component
+│   ├── 📁 cypress/                 # E2E testing
+│   │   └── 📁 e2e/                 # Cypress test specs
+│   ├── package.json                # Frontend dependencies
+│   └── tsconfig.json              # TypeScript configuration
+│
+├── 📁 documentation/               # Project documentation
+│   ├── DataModel.md               # Data model and entity documentation
+│   └── api-spec.yml               # OpenAPI specification
+│
+├── 📁 memory-bank/                # Project context & documentation
+│   ├── projectbrief.md           # Project overview
+│   ├── productContext.md         # Business context
+│   └── systemPatterns.md         # Architecture patterns
+│
+├── docker-compose.yml             # PostgreSQL containerization
+├── package.json                   # Root project configuration
+└── README.md                      # This file
 ```
 
-El servidor backend estará corriendo en http://localhost:3010 y el frontend estará disponible en http://localhost:3000.
+## 🚀 Setup Instructions
 
-## Docker y PostgreSQL
+### Prerequisites
 
-Este proyecto usa Docker para ejecutar una base de datos PostgreSQL. Así es cómo ponerlo en marcha:
+Ensure you have the following installed:
+- **Node.js** (v16 or higher)
+- **npm** (v8 or higher)
+- **Docker** and **Docker Compose**
+- **Git**
 
-Instala Docker en tu máquina si aún no lo has hecho. Puedes descargarlo desde aquí.
-Navega al directorio raíz del proyecto en tu terminal.
-Ejecuta el siguiente comando para iniciar el contenedor Docker:
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-org/AI4Devs-LTI.git
+cd AI4Devs-LTI
 ```
+
+### 2. Environment Configuration
+
+Create environment files for both backend and frontend:
+
+**Backend Environment** (`backend/.env`):
+```env
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=LTIdbUser
+DB_PASSWORD=D1ymf8wyQEGthFR1E9xhCq
+DB_NAME=LTIdb
+
+# Application Configuration
+PORT=3000
+NODE_ENV=development
+
+# Prisma Database URL
+DATABASE_URL="postgresql://LTIdbUser:D1ymf8wyQEGthFR1E9xhCq@localhost:5432/LTIdb"
+```
+
+**Frontend Environment** (`frontend/.env`):
+```env
+REACT_APP_API_URL=http://localhost:3000
+```
+
+### 3. Database Setup (PostgreSQL with Docker)
+
+Start the PostgreSQL database using Docker Compose:
+
+```bash
+# Start PostgreSQL container
 docker-compose up -d
-```
-Esto iniciará una base de datos PostgreSQL en un contenedor Docker. La bandera -d corre el contenedor en modo separado, lo que significa que se ejecuta en segundo plano.
 
-Para acceder a la base de datos PostgreSQL, puedes usar cualquier cliente PostgreSQL con los siguientes detalles de conexión:
- - Host: localhost
- - Port: 5432
- - User: postgres
- - Password: password
- - Database: mydatabase
-
-Por favor, reemplaza User, Password y Database con el usuario, la contraseña y el nombre de la base de datos reales especificados en tu archivo .env.
-
-Para detener el contenedor Docker, ejecuta el siguiente comando:
-```
-docker-compose down
+# Verify the database is running
+docker-compose ps
 ```
 
-Para generar la base de datos utilizando Prisma, sigue estos pasos:
+The PostgreSQL database will be available at:
+- **Host**: `localhost`
+- **Port**: `5432`
+- **Database**: `LTIdb`
+- **Username**: `LTIdbUser`
+- **Password**: `D1ymf8wyQEGthFR1E9xhCq`
 
-1. Asegúrate de que el archivo `.env` en el directorio raíz del backend contenga la variable `DATABASE_URL` con la cadena de conexión correcta a tu base de datos PostgreSQL. Si no te funciona, prueba a reemplazar la URL completa directamente en `schema.prisma`, en la variable `url`.
+### 4. Backend Setup
 
-2. Abre una terminal y navega al directorio del backend donde se encuentra el archivo `schema.prisma` y `seed.ts`
-cd backend/prisma
-
-3. Ejecuta los siguientes comandos para generar la estructura de prisma, las migraciones a tu base de datos y poblarla con datos de ejemplo:
-```
-npx prisma generate
-npx prisma migrate dev
-ts-node seed.ts
-```
-
-Una vez has dado todos los pasos, deberías poder guardar nuevos candidatos, tanto via web, como via API, verlos en la base de datos y obtenerlos mediante GET por id. 
-
-```
-POST http://localhost:3010/candidates
-{
-    "firstName": "Albert",
-    "lastName": "Saelices",
-    "email": "albert.saelices@gmail.com",
-    "phone": "656874937",
-    "address": "Calle Sant Dalmir 2, 5ºB. Barcelona",
-    "educations": [
-        {
-            "institution": "UC3M",
-            "title": "Computer Science",
-            "startDate": "2006-12-31",
-            "endDate": "2010-12-26"
-        }
-    ],
-    "workExperiences": [
-        {
-            "company": "Coca Cola",
-            "position": "SWE",
-            "description": "",
-            "startDate": "2011-01-13",
-            "endDate": "2013-01-17"
-        }
-    ],
-    "cv": {
-        "filePath": "uploads/1715760936750-cv.pdf",
-        "fileType": "application/pdf"
-    }
-}
-```
-
-## API Features
-
-The system provides a comprehensive REST API with the following key features:
-
-### Candidates Management
-- **GET /candidates**: Retrieve all candidates with pagination, search, and sorting
-  - Pagination: `?page=1&limit=10`
-  - Search: `?search=john` (searches in firstName, lastName, email)
-  - Sorting: `?sort=firstName&order=asc`
-- **POST /candidates**: Create a new candidate
-- **GET /candidates/:id**: Get candidate details by ID
-- **PUT /candidates/:id**: Update candidate interview stage
-
-### Positions Management
-- **GET /positions**: Get all visible positions
-- **PUT /positions/:id**: Update position details
-- **GET /positions/:id/candidates**: Get candidates for a specific position
-- **GET /positions/:id/candidates/names**: Get candidate names for a position
-- **GET /positions/:id/interviewflow**: Get interview flow for a position
-
-### File Upload
-- **POST /upload**: Upload CV files (PDF, DOCX supported)
-
-## Testing with Cypress
-
-The project includes end-to-end (e2e) tests using Cypress to test the complete application functionality. Tests are located in the `frontend/cypress/e2e/` directory.
-
-### Cypress Configuration
-
-Cypress is configured to run against:
-- Frontend: http://localhost:3001
-- Backend API: http://localhost:3010
-
-### Running Cypress Tests
-
-Before running tests, make sure both frontend and backend are running:
-
-1. **Start the backend:**
 ```bash
+# Navigate to backend directory
 cd backend
+
+# Install dependencies
+npm install
+
+# Generate Prisma client
+npm run prisma:generate
+
+# Run database migrations
+npx prisma migrate deploy
+
+# (Optional) Seed the database with sample data
+npx prisma db seed
+
+# Start the development server
+npm run dev
+```
+
+The backend API will be available at `http://localhost:3000`
+
+### 5. Frontend Setup
+
+```bash
+# Navigate to frontend directory (from project root)
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start the development server
 npm start
 ```
 
-2. **Start the frontend:**
-```bash
-cd frontend
-npm start
-```
+The frontend application will be available at `http://localhost:3001`
 
-3. **Run Cypress tests:**
+### 6. Cypress Testing Suite Setup
 
-To run tests in interactive mode (opens Cypress interface):
 ```bash
+# From the frontend directory
 cd frontend
+
+# Install Cypress (if not already installed)
+npm install
+
+# Open Cypress Test Runner (Interactive)
 npm run cypress:open
-```
 
-To run tests in headless mode (without GUI):
-```bash
-cd frontend
+# Or run tests headlessly
 npm run cypress:run
 ```
 
-Para ejecutar los tests en modo headless con configuración específica:
+## 🧪 Testing
+
+### Backend Testing
+
 ```bash
-cd frontend
-npm run cypress:run:headless
+cd backend
+
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
 ```
 
-### Tests Disponibles
+### Frontend Testing
 
-Los tests actuales cubren:
-- **Candidatos (`candidates.cy.ts`)**: Tests para la API de candidatos incluyendo listado, paginación, filtros y validación.
-- **Posiciones (`positions.cy.ts`)**: Tests para la API de posiciones incluyendo operaciones CRUD y validaciones.
+```bash
+cd frontend
 
-### Estructura de Tests
+# Run unit tests
+npm test
 
-Los tests están organizados en:
-- `frontend/cypress/e2e/`: Tests end-to-end
-- `frontend/cypress.config.ts`: Configuración de Cypress
-- `frontend/cypress/tsconfig.json`: Configuración de TypeScript para Cypress
+# Run E2E tests with Cypress
+npm run cypress:run
 
+# Open Cypress Test Runner
+npm run cypress:open
+```
+
+## 📊 Database Schema
+
+The system uses the following main entities:
+
+- **Candidates**: Personal information, education, work experience
+- **Companies**: Organizations posting positions
+- **Positions**: Job openings with requirements and descriptions
+- **Applications**: Candidate applications to specific positions
+- **Interview Flows**: Configurable interview process stages
+- **Interviews**: Individual interview sessions and results
+
+For detailed schema information, entity relationships, and the complete data model documentation, see [`documentation/DataModel.md`](documentation/DataModel.md).
+
+## 🔗 API Documentation
+
+The REST API follows OpenAPI 3.0 specification. Key endpoints include:
+
+- `GET /candidates` - List candidates with filtering and pagination
+- `POST /candidates` - Create new candidate
+- `GET /candidates/{id}` - Get candidate details
+- `GET /positions` - List available positions
+- `POST /positions` - Create new position
+- `PUT /candidates/{id}` - Update candidate interview stage
+
+Full API documentation is available in `documentation/api-spec.yml`.
+
+## 🤝 Contributing
+
+1. Follow the established coding patterns and architecture
+2. Write tests for new features
+3. Update documentation for API changes
+4. Use TypeScript for type safety
+5. Follow the domain-driven design principles
+
+## 📄 License
+
+This project is licensed under the ISC License.
+
+## 📞 Support
+
+For questions or support, please contact the LTI Development Team. 

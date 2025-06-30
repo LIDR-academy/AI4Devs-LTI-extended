@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getCandidatesByPositionService, getInterviewFlowByPositionService, getAllPositionsService, getCandidateNamesByPositionService, updatePositionService } from '../../application/services/positionService';
+import { getCandidatesByPositionService, getInterviewFlowByPositionService, getAllPositionsService, getCandidateNamesByPositionService, updatePositionService, getPositionByIdService } from '../../application/services/positionService';
 
 
 export const getAllPositions = async (req: Request, res: Response) => {
@@ -8,6 +8,42 @@ export const getAllPositions = async (req: Request, res: Response) => {
         res.status(200).json(positions);
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving positions', error: error instanceof Error ? error.message : String(error) });
+    }
+};
+
+export const getPositionById = async (req: Request, res: Response) => {
+    try {
+        const positionId = parseInt(req.params.id);
+        
+        // Validate position ID format
+        if (isNaN(positionId)) {
+            return res.status(400).json({ 
+                message: 'Invalid position ID format',
+                error: 'Position ID must be a valid number'
+            });
+        }
+
+        const position = await getPositionByIdService(positionId);
+        res.status(200).json(position);
+    } catch (error) {
+        if (error instanceof Error) {
+            if (error.message === 'Position not found') {
+                res.status(404).json({ 
+                    message: 'Position not found', 
+                    error: error.message 
+                });
+            } else {
+                res.status(500).json({ 
+                    message: 'Error retrieving position', 
+                    error: error.message 
+                });
+            }
+        } else {
+            res.status(500).json({ 
+                message: 'Error retrieving position', 
+                error: 'Unknown error occurred' 
+            });
+        }
     }
 };
 
