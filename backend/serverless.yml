@@ -1,0 +1,39 @@
+service: lti-interviews-api
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL}
+    NODE_ENV: ${env:NODE_ENV}
+
+functions:
+  api:
+    handler: dist/lambda.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+    environment:
+      DATABASE_URL: ${env:DATABASE_URL}
+      NODE_ENV: ${env:NODE_ENV}
+    vpc:
+      securityGroupIds:
+        - sg-xxxxxxxxxxxxxxxxx # Reemplazar con tu Security Group ID
+      subnetIds:
+        - subnet-xxxxxxxxxxxxxxxxx # Reemplazar con tu Subnet ID
+    timeout: 30
+    memorySize: 256
+
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+custom:
+  dotenv:
+    path: ./.env
+    include:
+      - DATABASE_URL
+      - NODE_ENV 

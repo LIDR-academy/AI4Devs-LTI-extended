@@ -1,0 +1,28 @@
+# Ignore in all directories
+**/.DS_Store
+#**/.env
+**/.env.example
+**/node_modules
+**/prompts_master.md
+
+# other dependencies
+**/.pnp
+**.pnp.js
+
+# testing
+**/coverage
+
+# production
+**/build
+**/dist
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.idea
+.vscode
+
+# .env

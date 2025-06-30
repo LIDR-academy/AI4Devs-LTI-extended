@@ -1,0 +1,3 @@
+# Memory Bank - Exclude from Cursor indexing
+@memory-bank-rules.mdc
+@memory-bank/
