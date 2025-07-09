@@ -2,14 +2,8 @@ import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Container, Row, Col, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
-
-type Position = {
-    id: number;
-    title: string;
-    contactInfo: string;
-    applicationDeadline: string;
-    status: 'Open' | 'Contratado' | 'Cerrado' | 'Borrador';
-};
+import { Position } from '../models/types/Position';
+import { getPositionStatusBadgeColor } from '../models/enums/PositionStatus';
 
 const Positions: React.FC = () => {
     const [positions, setPositions] = useState<Position[]>([]);
@@ -96,7 +90,7 @@ const Positions: React.FC = () => {
                                     <strong>Manager:</strong> {position.contactInfo}<br />
                                     <strong>Deadline:</strong> {position.applicationDeadline}
                                 </Card.Text>
-                                <span className={`badge ${position.status === 'Open' ? 'bg-warning' : position.status === 'Contratado' ? 'bg-success' : position.status === 'Borrador' ? 'bg-secondary' : 'bg-warning'} text-white`}>
+                                <span className={`badge ${getPositionStatusBadgeColor(position.status)} text-white`}>
                                     {position.status}
                                 </span>
                                 <div className="d-flex justify-content-between mt-3">
