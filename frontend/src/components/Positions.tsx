@@ -2,6 +2,7 @@ import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Container, Row, Col, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
+import BackButton from './BackButton';
 
 type Position = {
     id: number;
@@ -51,9 +52,7 @@ const Positions: React.FC = () => {
 
     return (
         <Container className="mt-5">
-            <Button variant="link" onClick={() => navigate('/')} className="mb-3">
-                Volver al Dashboard
-            </Button>
+            <BackButton to="/" />
             <h2 className="text-center mb-4">Posiciones</h2>
             <Row className="mb-4">
                 <Col md={3}>
