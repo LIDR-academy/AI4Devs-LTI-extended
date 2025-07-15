@@ -11,7 +11,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://LTIdbUser:D1ymf8wyQEGthFR1E9xhCq@localhost:5432/LTIdb"
+  url      = "postgresql://ltidbuser:D1ymf8wyQEGthFR1E9xhCq@localhost:5432/ltidb"
 }
 
 model Candidate {

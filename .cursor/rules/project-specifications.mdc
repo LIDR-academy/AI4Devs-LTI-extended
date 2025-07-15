@@ -1,0 +1,32 @@
+---
+alwaysApply: true
+---
+# LTI Project Specifications
+
+This file contains the project specifications and rules for the LTI (Learning Technology Initiative) project. For detailed frontend configuration and best practices, refer to the comprehensive guide in `documentation/project-configuration.md`.
+
+## Project Overview
+
+LTI is an Applicant Tracking System (ATS) designed for managing candidates, positions, interviews, and recruitment processes. The system follows Domain-Driven Design principles and implements a layered architecture for scalable recruitment management.
+
+## Key Specifications
+
+### Architecture
+- **Backend**: Node.js with Express, TypeScript, Prisma ORM
+- **Frontend**: React 18.3.1 with TypeScript, Bootstrap
+- **Database**: PostgreSQL with Docker
+- **Testing**: Cypress for E2E, Jest for unit tests
+
+### API Structure
+- Base URL: `http://localhost:3000` (development)
+- RESTful endpoints for candidates, positions, and applications
+- File upload capabilities for resumes and documents
+
+### Development Standards
+- All technical documentation in English
+- Conventional commit messages
+- 2-space indentation
+- No inline CSS in HTML files
+- Service layer architecture for API calls
+
+For complete frontend configuration details, coding standards, and best practices, see: `documentation/project-configuration.md`
