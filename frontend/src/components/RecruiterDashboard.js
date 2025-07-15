@@ -11,7 +11,7 @@ const RecruiterDashboard = () => {
             </div>
             <h1 className="mb-4 text-center">Dashboard del Reclutador</h1>
             <Row>
-                <Col md={6}>
+                <Col md={4}>
                     <Card className="shadow p-4">
                         <h5 className="mb-4">Añadir Candidato</h5>
                         <Link to="/add-candidate">
@@ -19,7 +19,15 @@ const RecruiterDashboard = () => {
                         </Link>
                     </Card>
                 </Col>
-                <Col md={6}>
+                <Col md={4}>
+                    <Card className="shadow p-4">
+                        <h5 className="mb-4">Ver Candidatos</h5>
+                        <Link to="/candidates">
+                            <Button variant="primary" className="btn-block">Ir a Candidatos</Button>
+                        </Link>
+                    </Card>
+                </Col>
+                <Col md={4}>
                     <Card className="shadow p-4">
                         <h5 className="mb-4">Ver Posiciones</h5>
                         <Link to="/positions">
