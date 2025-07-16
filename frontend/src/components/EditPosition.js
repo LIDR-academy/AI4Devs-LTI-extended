@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Form, Button, Alert, Card, Spinner } from 'react-bootstrap';
 import { positionService } from '../services/positionService';
+import BackButton from './BackButton';
 
 const EditPosition = () => {
     const { id } = useParams();
@@ -177,9 +178,7 @@ const EditPosition = () => {
 
     return (
         <Container className="mt-5">
-            <Button variant="link" onClick={() => navigate('/positions')} className="mb-3">
-                ← Volver a Posiciones
-            </Button>
+            <BackButton to="/positions" />
             
             <Row className="justify-content-center">
                 <Col md={8}>

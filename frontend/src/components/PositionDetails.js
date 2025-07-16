@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Row, Offcanvas, Button } from 'react-bootstrap';
+import { Container, Row, Offcanvas } from 'react-bootstrap';
 import { DragDropContext } from 'react-beautiful-dnd';
 import StageColumn from './StageColumn';
 import CandidateDetails from './CandidateDetails';
 import { useNavigate } from 'react-router-dom';
+import BackButton from './BackButton';
 
 const PositionsDetails = () => {
     const { id } = useParams();
@@ -107,9 +108,7 @@ const PositionsDetails = () => {
 
     return (
         <Container className="mt-5">
-            <Button variant="link" onClick={() => navigate('/positions')} className="mb-3">
-                Volver a Posiciones
-            </Button>
+            <BackButton to="/positions" />
             <h2 className="text-center mb-4">{positionName}</h2>
             <DragDropContext onDragEnd={onDragEnd}>
                 <Row>
