@@ -11,6 +11,7 @@ const Candidates: React.FC = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    // Fetch candidates from the API
     useEffect(() => {
         const fetchCandidates = async () => {
             try {
