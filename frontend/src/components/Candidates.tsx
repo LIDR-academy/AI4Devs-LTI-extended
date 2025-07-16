@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Container, Row, Col, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { getCandidates } from '../services/candidateService';
 import { Candidate } from '../models/types/Candidate';
+import BackButton from './BackButton';
 
 const Candidates: React.FC = () => {
     const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -66,9 +67,7 @@ const Candidates: React.FC = () => {
 
     return (
         <Container className="mt-5">
-            <Button variant="link" onClick={() => navigate('/')} className="mb-3">
-                Volver al Dashboard
-            </Button>
+            <BackButton />
             <h2 className="text-center mb-4">Candidatos</h2>
             
             <Row className="mb-4">
