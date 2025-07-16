@@ -4,6 +4,7 @@ import { Card, Container, Row, Col, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { Position } from '../models/types/Position';
 import { getPositionStatusBadgeColor } from '../models/enums/PositionStatus';
+import BackButton from './BackButton';
 
 const Positions: React.FC = () => {
     const [positions, setPositions] = useState<Position[]>([]);
@@ -45,9 +46,7 @@ const Positions: React.FC = () => {
 
     return (
         <Container className="mt-5">
-            <Button variant="link" onClick={() => navigate('/')} className="mb-3">
-                Volver al Dashboard
-            </Button>
+            <BackButton />
             <h2 className="text-center mb-4">Posiciones</h2>
             <Row className="mb-4">
                 <Col md={3}>
