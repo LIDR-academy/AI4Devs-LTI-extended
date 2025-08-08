@@ -25,14 +25,5 @@ export const positionService = {
     }
   },
 
-  // Update position
-  updatePosition: async (id, positionData) => {
-    try {
-      const response = await axios.put(`${API_BASE_URL}/positions/${id}`, positionData);
-      return response.data;
-    } catch (error) {
-      console.error('Error updating position:', error);
-      throw error;
-    }
-  }
+
 }; 
