@@ -1,4 +1,4 @@
-# LTI (Learning Technology Initiative) - ATS System
+# LTI (Leadership. Technology. Impact) - ATS System
 
 ## 📋 Overview
 
