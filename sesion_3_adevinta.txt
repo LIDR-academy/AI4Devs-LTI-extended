@@ -1,0 +1,740 @@
+
+ ▐▛███▜▌   Claude Code v2.0.5
+▝▜█████▛▘  Sonnet 4.5 · Claude Pro
+  ▘▘ ▝▝    /…/projects/lidr/AI4Devs-LTI-extended
+
+> Crea un subagente de control de css y ux en mi proyecto. 
+El subagente debe estar situado en la carpeta 
+.claude/agents. Muestrame primero todas las funciones que 
+darás al agente y los servidores MCP a los que le darías 
+acceso 
+
+⏺ Voy a investigar la estructura actual del proyecto para
+  diseñar el subagente de control de CSS y UX.
+
+⏺ Bash(ls -la .claude/)
+  ⎿  total 8                                               
+     drwx------   3 antonioperez  staff   96  3 oct.  11:43
+     .
+     … +4 lines (ctrl+o to expand)
+
+⏺ Search(pattern: "**/.claude/**/*")
+  ⎿  Found 1 file (ctrl+o to expand)
+
+⏺ Read(frontend/src/index.css)
+  ⎿  Read 14 lines (ctrl+o to expand)
+
+⏺ Read(frontend/src/App.css)
+  ⎿  Read 39 lines (ctrl+o to expand)
+
+⏺ Search(pattern: "frontend/src/components/*.tsx")
+  ⎿  Found 5 files (ctrl+o to expand)
+
+⏺ Search(pattern: "frontend/src/components/*.js")
+  ⎿  Found 8 files (ctrl+o to expand)
+
+⏺ Read(.claude/settings.local.json)
+  ⎿  Read 17 lines (ctrl+o to expand)
+
+⏺ Read(frontend/src/components/CandidateCard.js)
+  ⎿  Read 29 lines (ctrl+o to expand)
+
+⏺ Read(frontend/src/components/RecruiterDashboard.js)
+  ⎿  Read 50 lines (ctrl+o to expand)
+
+⏺ Basándome en el análisis del proyecto, aquí está el diseño
+   completo del subagente de control de CSS y UX:
+
+  Subagente: CSS & UX Auditor
+
+  📋 Funciones del Agente
+
+  1. Auditoría de Estilos CSS
+
+  - Detectar inline styles (prohibidos según guías del
+  proyecto)
+  - Validar uso correcto de utility classes de Bootstrap
+  (mt-*, mb-*, p-*, etc.)
+  - Identificar CSS custom innecesario que podría
+  reemplazarse con Bootstrap
+  - Verificar consistencia en spacing (mt-5 para containers,
+   mb-4 para secciones)
+  - Detectar archivos CSS no utilizados
+
+  2. Validación de Componentes UI
+
+  - Verificar uso de React Bootstrap en lugar de HTML plano
+  (<Button> vs <button>)
+  - Comprobar variantes correctas: primary, secondary,
+  success, danger, warning
+  - Validar estructura de componentes (Container → Row →
+  Col)
+  - Verificar sistema de badges y colores según
+  PositionStatus
+  - Comprobar uso correcto de Card, Alert, Spinner,
+  Offcanvas
+
+  3. Accesibilidad (A11y)
+
+  - Verificar presencia de aria-label en botones y controles
+  - Comprobar role attributes (ej: role="status" en
+  Spinners)
+  - Validar visually-hidden class para screen readers
+  - Verificar contraste de colores según WCAG
+  - Detectar imágenes sin alt text
+
+  4. Consistencia de Patrones
+
+  - Patrones de Layout:
+    - Card-Based Layouts (shadow-sm, Card.Body, Card.Title)
+    - Grid Layout Pattern (Container, Row, Col md={4|6|12})
+    - Filter Bar Pattern (Row con Form.Control)
+  - Patrones de Estado:
+    - Loading State (Spinner con visually-hidden)
+    - Error State (Alert variant="danger" con retry button)
+  - Patrones de Interacción:
+    - Drag & Drop (react-beautiful-dnd)
+    - File Upload (FileUploader con InputGroup)
+    - Date Selection (react-datepicker)
+
+  5. Integración con Figma
+
+  - Comparar implementación con diseños de Figma
+  - Extraer especificaciones de diseño (colores, espaciado,
+  tipografía)
+  - Generar código React Bootstrap desde componentes de
+  Figma
+  - Capturar screenshots para comparación visual
+  - Mapear componentes de código con componentes de Figma
+
+  6. Análisis UX
+
+  - Validar flujos de usuario completos
+  - Verificar feedback visual adecuado (spinners,
+  confirmaciones)
+  - Comprobar responsive design (breakpoints md, lg)
+  - Analizar interacciones (hover states, focus states)
+  - Validar tiempos de carga y loading states
+
+  7. Reportes y Recomendaciones
+
+  - Generar informes de auditoría con issues detectados
+  - Proponer mejoras de UX basadas en mejores prácticas
+  - Sugerir optimizaciones de CSS (reducir custom CSS)
+  - Documentar inconsistencias vs guías del proyecto
+  - Priorizar issues (crítico, alto, medio, bajo)
+
+  ---
+  🔧 Servidores MCP con Acceso
+
+  1. figma-dev-mode-mcp-server (Figma en modo desarrollo)
+
+  // Herramientas disponibles:
+  - get_code(nodeId, clientFrameworks, clientLanguages,
+  forceCode)
+    // Generar código UI desde nodos de Figma
+
+  - get_screenshot(nodeId, clientFrameworks,
+  clientLanguages)
+    // Capturar screenshots de diseños
+
+  - get_metadata(nodeId, clientFrameworks, clientLanguages)
+    // Obtener estructura XML con IDs, tipos, nombres, 
+  posiciones
+
+  - get_variable_defs(nodeId, clientFrameworks,
+  clientLanguages)
+    // Obtener variables de diseño (colores, fuentes, 
+  espaciado)
+
+  - get_code_connect_map(nodeId, clientFrameworks,
+  clientLanguages)
+    // Mapear componentes Figma → componentes del código
+
+  - create_design_system_rules(clientFrameworks,
+  clientLanguages)
+    // Generar reglas de sistema de diseño
+
+  2. figma-local (Figma local)
+
+  // Mismas herramientas que figma-dev-mode-mcp-server
+  // Para trabajo con archivos Figma locales
+
+  ---
+  🛠️ Herramientas Adicionales
+
+  Análisis de Código:
+
+  - Read: Leer componentes React y archivos CSS
+  - Grep: Buscar patrones específicos (inline styles,
+  className patterns)
+  - Glob: Encontrar todos los archivos .css, .js, .tsx
+
+  Investigación:
+
+  - WebFetch: Consultar documentación de React Bootstrap,
+  guías de accesibilidad
+  - WebSearch: Investigar mejores prácticas UX/CSS, patrones
+   de diseño
+
+  Validación:
+
+  - Bash: Ejecutar linters CSS (stylelint), herramientas
+  a11y (axe-core)
+
+  ---
+  📁 Estructura del Archivo del Agente
+
+  El agente se creará en:
+  .claude/agents/css-ux-auditor.json
+
+  Con la siguiente estructura:
+  {
+    "name": "css-ux-auditor",
+    "description": "Audits CSS implementation, UI 
+  consistency, and UX patterns",
+    "capabilities": [
+      "css-audit",
+      "ui-component-validation",
+      "accessibility-check",
+      "pattern-consistency",
+      "figma-comparison",
+      "ux-analysis",
+      "reporting"
+    ],
+    "mcpServers": [
+      "figma-dev-mode-mcp-server",
+      "figma-local"
+    ],
+    "tools": [
+      "Read", "Grep", "Glob",
+      "WebFetch", "WebSearch",
+      "Bash"
+    ],
+    "projectContext": {
+      "framework": "React 18 + React Bootstrap 5.3.3",
+      "cssApproach": "Bootstrap utility classes only",
+      "prohibitions": ["inline styles", "custom CSS files"],
+      "patterns": ["Card-based layouts", "Grid system",
+  "Loading/Error states"]
+    }
+  }
+
+  ---
+  🎯 Casos de Uso
+
+  1. Pre-commit hook: Validar CSS/UX antes de commits
+  2. PR reviews: Auditoría automática en pull requests
+  3. Refactoring: Identificar componentes que no siguen
+  patrones
+  4. Figma sync: Verificar que implementación coincide con
+  diseños
+  5. Accessibility audit: Escaneo completo de a11y issues
+  6. Onboarding: Guiar a nuevos devs sobre patrones del
+  proyecto
+
+  ¿Te gustaría que proceda con la creación del archivo del
+  agente?
+
+> Me parece bien la configuración pero preferiría que lo 
+crearas en formato markdown 
+
+⏺ Fetch(https://docs.claude.com/en/docs/claude-code/claude_code_
+       docs_map.md)
+  ⎿  Received 27.5KB (200 OK)
+
+⏺ Bash(find . -name "*.md" -path "*/.claude/*" -o -name
+      "*agent*" -path "*/.claude/*" 2>/dev/null | head -20)
+  ⎿  (No content)
+                                                           
+⏺ User approved Claude's plan:
+  ⎿ Plan: Crear Subagente CSS & UX Auditor en Markdown
+
+    Acciones a realizar:
+
+    1. Crear directorio de agentes (si no existe)
+      - Crear .claude/agents/
+
+    2. Crear archivo del agente en markdown
+      - Archivo: .claude/agents/css-ux-auditor.md
+      - Contendrá:
+          - Metadata del agente (nombre, descripción, 
+    versión)
+        - 7 funciones principales detalladas
+        - Herramientas disponibles (Read, Grep, Glob, 
+    WebFetch, WebSearch, Bash)
+        - Acceso a servidores MCP Figma 
+    (figma-dev-mode-mcp-server, figma-local)
+        - Contexto del proyecto (React Bootstrap, reglas 
+    CSS, patrones UX)
+        - Reglas de auditoría específicas
+        - Casos de uso y ejemplos
+        - Checklist de validación
+
+    El archivo será completamente autodocumentado en 
+    markdown para fácil lectura y mantenimiento.
+
+⏺ Bash(mkdir -p .claude/agents)
+  ⎿  (No content)
+
+⏺ Write(.claude/agents/css-ux-auditor.md)
+  ⎿  Wrote 660 lines to .claude/agents/css-ux-auditor.md   
+     # CSS & UX Auditor Agent
+     **Version:** 1.0.0
+     **Type:** Specialized Subagent
+     **Domain:** Frontend Development, UI/UX Quality
+     Assurance
+     ## Overview
+     This agent is specialized in auditing CSS
+     implementation, UI component consistency, and UX
+     patterns in the LTI ATS project. It ensures adherence
+     to React Bootstrap best practices, accessibility
+     standards, and project-specific design guidelines.
+     … +650 lines (ctrl+o to expand)
+
+⏺ Creado el subagente CSS & UX Auditor en
+  .claude/agents/css-ux-auditor.md
+
+  El archivo incluye:
+
+  ✅ 7 Funciones Principales:
+  1. CSS Style Auditing (inline styles, Bootstrap utilities)
+  2. UI Component Validation (React Bootstrap compliance)
+  3. Accessibility Compliance (WCAG 2.1 AA)
+  4. Design Pattern Consistency (5 patrones documentados)
+  5. Figma Design Integration (con todos los métodos MCP)
+  6. UX Quality Analysis (flows, feedback, responsive)
+  7. Audit Reporting & Recommendations
+
+  ✅ Servidores MCP:
+  - figma-dev-mode-mcp-server - 6 métodos disponibles
+  - figma-local - 6 métodos disponibles
+
+  ✅ Herramientas:
+  Read, Grep, Glob, WebFetch, WebSearch, Bash
+
+  ✅ Contexto del Proyecto:
+  - Reglas CSS (no inline styles, Bootstrap-first)
+  - Patrones de componentes (Card, Grid, Loading, Error)
+  - Sistema de badges de estado
+  - Stack tecnológico completo
+
+  ✅ Workflows:
+  - Full Project Audit
+  - Component Audit
+  - Figma Sync Audit
+  - Pre-commit Validation
+
+  ✅ Quick Reference:
+  - Tabla de issues comunes y fixes
+  - Bootstrap utility classes
+  - Métricas de éxito
+
+> Sugiereme para este proyecto otros subagentes que me 
+puedan resultar útiles para trabajar en frontend 
+
+⏺ Basándome en el análisis del proyecto LTI, te sugiero
+  estos 5 subagentes especializados para frontend:
+
+  ---
+  1. Component Generator Agent
+
+  Propósito: Generar componentes React siguiendo los
+  patrones del proyecto
+
+  Funcionalidades:
+  - Generar componentes desde templates predefinidos
+  - Aplicar automáticamente patrones del proyecto
+  (Card-based, Grid, Filter Bar)
+  - Crear componentes TypeScript con tipos correctos
+  - Incluir propTypes/interfaces según nomenclatura del
+  proyecto
+  - Generar componentes desde Figma con código optimizado
+  - Aplicar naming conventions (PascalCase para componentes)
+  - Incluir imports de React Bootstrap automáticamente
+  - Generar storybook stories (si se implementa)
+
+  Herramientas:
+  - Write, Edit, Read, Glob
+  - Figma MCP (get_code, get_metadata)
+  - WebFetch (React Bootstrap docs)
+
+  Casos de uso:
+  - "Genera un componente CandidateFilter que siga el Filter
+   Bar Pattern"
+  - "Crea un componente ApplicationStatusCard desde el nodo
+  Figma 234:567"
+  - "Genera un modal de confirmación usando React Bootstrap"
+
+  ---
+  2. API Integration Agent
+
+  Propósito: Gestionar la integración entre frontend y
+  backend
+
+  Funcionalidades:
+  - Generar servicios API desde OpenAPI spec
+  (documentation/api-spec.yml)
+  - Validar que las llamadas API coincidan con el spec
+  - Detectar endpoints deprecados o no documentados
+  - Generar TypeScript types desde respuestas del backend
+  - Manejar estados de loading/error consistentemente
+  - Implementar retry logic y error handling
+  - Validar CORS configuration (puerto 3010 vs 3001)
+  - Detectar API calls sin manejo de errores
+  - Sugerir optimizaciones (caching, debouncing)
+
+  Herramientas:
+  - Read (api-spec.yml, services/*.ts)
+  - Grep (buscar fetch/axios calls)
+  - Bash (test API endpoints)
+  - WebFetch (backend endpoints)
+
+  Casos de uso:
+  - "Valida que todos los servicios en
+  frontend/src/services/ coincidan con el API spec"
+  - "Genera el servicio InterviewService desde el API spec"
+  - "Detecta llamadas API sin loading states"
+
+  ---
+  3. Testing & Quality Agent
+
+  Propósito: Crear y mantener tests de calidad
+
+  Funcionalidades:
+  - Generar tests de Jest para componentes React
+  - Crear tests E2E de Cypress desde user flows
+  - Detectar componentes sin tests (target: 90% coverage)
+  - Generar mocks de servicios API
+  - Validar que tests sigan AAA pattern (Arrange, Act,
+  Assert)
+  - Crear test fixtures y factories
+  - Detectar tests frágiles (dependencias en timing, IDs
+  hardcodeados)
+  - Generar tests de accesibilidad con jest-axe
+  - Analizar coverage y reportar gaps
+
+  Herramientas:
+  - Read, Write, Edit
+  - Bash (npm test, npm run cypress:run)
+  - Grep (buscar describe/it patterns)
+  - Glob (find test files)
+
+  Casos de uso:
+  - "Genera tests de Jest para CandidateCard.js"
+  - "Crea un test E2E para el flujo de añadir candidato"
+  - "Analiza coverage y sugiere qué componentes testear
+  primero"
+
+  ---
+  4. TypeScript Migration Agent
+
+  Propósito: Migrar componentes .js legacy a TypeScript
+
+  Funcionalidades:
+  - Convertir componentes .js a .tsx
+  - Generar interfaces TypeScript para props
+  - Inferir tipos desde PropTypes
+  - Añadir tipos para state y hooks
+  - Generar tipos desde respuestas API
+  - Detectar uso de any y sugerir tipos específicos
+  - Validar tipos con el schema de Prisma
+  - Actualizar imports y exports
+  - Refactorizar para aprovechar TS features (enums, union
+  types)
+
+  Herramientas:
+  - Read, Write, Edit
+  - Grep (find .js files)
+  - Bash (tsc --noEmit para validar)
+  - Read (backend Prisma schema para tipos)
+
+  Casos de uso:
+  - "Migra RecruiterDashboard.js a TypeScript"
+  - "Convierte todos los componentes en /components a .tsx"
+  - "Genera tipos TypeScript desde el Prisma schema para
+  Candidate"
+
+  ---
+  5. Performance Optimization Agent
+
+  Propósito: Analizar y optimizar performance del frontend
+
+  Funcionalidades:
+  - Detectar re-renders innecesarios
+  - Sugerir uso de React.memo, useMemo, useCallback
+  - Analizar bundle size y sugerir code splitting
+  - Detectar imágenes no optimizadas
+  - Identificar dependencias pesadas no usadas
+  - Sugerir lazy loading para componentes
+  - Detectar loops costosos en renders
+  - Analizar Web Vitals (LCP, FID, CLS)
+  - Identificar memory leaks (useEffect sin cleanup)
+  - Sugerir virtualización para listas largas
+
+  Herramientas:
+  - Read, Grep, Glob
+  - Bash (npm run build, webpack-bundle-analyzer)
+  - WebFetch (lighthouse reports)
+  - WebSearch (performance best practices)
+
+  Casos de uso:
+  - "Analiza performance de la lista de candidatos"
+  - "Sugiere optimizaciones para el Kanban board
+  (PositionDetails.js)"
+  - "Detecta componentes que causan re-renders frecuentes"
+
+  ---
+  Bonus: 3 Subagentes Adicionales
+
+  6. Form Wizard Agent
+
+  Especializado en crear y validar formularios complejos
+  (AddCandidateForm tiene education, work experience, file
+  uploads)
+
+  7. State Management Agent
+
+  Para implementar Context API, reducers, o migrar a
+  Zustand/Redux si crece la complejidad
+
+  8. Internationalization (i18n) Agent
+
+  Para preparar el proyecto para multi-idioma (actualmente
+  mezcla español/inglés)
+
+  ---
+  Prioridad Recomendada
+
+  Para tu proyecto específicamente:
+
+  1. 🥇 API Integration Agent - Crítico porque ya tienes
+  api-spec.yml y servicios que sincronizar
+  2. 🥈 Testing & Quality Agent - Necesitas llegar al 90%
+  coverage
+  3. 🥉 TypeScript Migration Agent - Tienes .js y .tsx
+  mezclados, unificar mejorará mantenibilidad
+  4. Component Generator Agent - Acelerará desarrollo
+  consistente
+  5. Performance Optimization Agent - Para cuando crezcas en
+   usuarios/datos
+
+  ¿Quieres que genere alguno de estos agentes en particular?
+
+> Si, crea estos agentes igualmente en la carpeta 
+.claude/agents 
+
+⏺ Write(.claude/agents/component-generator.md)
+  ⎿  Wrote 753 lines to                                    
+     .claude/agents/component-generator.md
+     # Component Generator Agent
+     **Version:** 1.0.0
+     **Type:** Specialized Subagent
+     **Domain:** Frontend Development, React Component
+     Creation
+     ## Overview
+     This agent specializes in generating React components
+     following LTI project patterns and conventions. It
+     ensures consistency, applies React Bootstrap best
+     practices, and generates components from templates or
+     Figma designs.
+     … +743 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/api-integration.md)
+  ⎿  Wrote 963 lines to .claude/agents/api-integration.md  
+     # API Integration Agent
+     **Version:** 1.0.0
+     **Type:** Specialized Subagent
+     **Domain:** Frontend-Backend Integration, API
+     Management
+     ## Overview
+     This agent specializes in managing the integration
+     between frontend and backend services in the LTI ATS
+     project. It ensures API calls match the OpenAPI
+     specification, validates data contracts, and implements
+      consistent error handling patterns.
+     … +953 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/testing-quality.md)
+  ⎿  Wrote 1071 lines to .claude/agents/testing-quality.md 
+     # Testing & Quality Agent
+     **Version:** 1.0.0
+     **Type:** Specialized Subagent
+     **Domain:** Quality Assurance, Test Automation
+     ## Overview
+     This agent specializes in creating and maintaining
+     comprehensive test coverage for the LTI ATS project. It
+      ensures code quality through unit tests, integration
+     tests, and end-to-end tests, targeting the project's
+     90% coverage threshold.
+     … +1061 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/typescript-migration.md)
+  ⎿  Wrote 1056 lines to                                   
+     .claude/agents/typescript-migration.md
+     # TypeScript Migration Agent
+     **Version:** 1.0.0
+     **Type:** Specialized Subagent
+     **Domain:** Code Modernization, Type Safety
+     ## Overview
+     This agent specializes in migrating JavaScript
+     components to TypeScript, ensuring type safety and
+     leveraging TypeScript features. It systematically
+     converts .js files to .tsx, adds proper type
+     definitions, and eliminates the use of `any` types.
+     … +1046 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/performance-optimization.md)
+  ⎿  Wrote 1142 lines to                                   
+     .claude/agents/performance-optimization.md
+     # Performance Optimization Agent
+     **Version:** 1.0.0
+     **Type:** Specialized Subagent
+     **Domain:** Frontend Performance, Optimization
+     ## Overview
+     This agent specializes in analyzing and optimizing
+     frontend performance in the LTI ATS project. It
+     identifies bottlenecks, suggests optimizations, and
+     implements best practices for React performance, bundle
+      size, and runtime efficiency.
+     … +1132 lines (ctrl+o to expand)
+
+⏺ Bash(ls -lh .claude/agents/)
+  ⎿ total 296                                              
+    -rw-r--r--  1 antonioperez  staff    23K  3 oct.  12:42
+     api-integration.md
+    … +10 lines (ctrl+o to expand)
+
+
+⏺ Write(.claude/agents/README.md)
+  ⎿  Wrote 229 lines to .claude/agents/README.md           
+     # Claude Code Specialized Agents
+     This directory contains specialized subagent
+     definitions for the LTI ATS project. Each agent is an
+     expert in a specific domain of frontend development.
+     ## Available Agents
+     ### 1. CSS & UX Auditor
+     **File:** `css-ux-auditor.md`
+     **Size:** 18KB
+     **Domain:** UI/UX Quality Assurance
+     … +219 lines (ctrl+o to expand)
+
+⏺ ✅ Todos los agentes creados exitosamente
+
+  He creado 6 agentes especializados en .claude/agents/:
+
+  📁 Agentes Creados
+
+  | Agente                   | Archivo                     |
+   Tamaño | Dominio                      |
+  |--------------------------|-----------------------------|
+  --------|------------------------------|
+  | CSS & UX Auditor         | css-ux-auditor.md           |
+   18KB   | UI/UX Quality Assurance      |
+  | Component Generator      | component-generator.md      |
+   18KB   | React Component Creation     |
+  | API Integration          | api-integration.md          |
+   23KB   | Frontend-Backend Integration |
+  | Testing & Quality        | testing-quality.md          |
+   27KB   | Test Automation              |
+  | TypeScript Migration     | typescript-migration.md     |
+   25KB   | Type Safety                  |
+  | Performance Optimization | performance-optimization.md |
+   26KB   | Performance                  |
+
+  Total: ~137KB de documentación
+
+  ---
+  🎯 Resumen por Agente
+
+  1. CSS & UX Auditor
+
+  - Audita estilos y validación de componentes React
+  Bootstrap
+  - Integración con Figma (get_code, get_screenshot,
+  get_variables)
+  - Accesibilidad WCAG 2.1 AA
+  - 5 patrones de diseño documentados
+
+  2. Component Generator
+
+  - Genera componentes desde templates o Figma
+  - 3 templates principales (Card, Filter Bar, Modal)
+  - Gestión automática de imports y tipos
+  - Naming conventions y documentación JSDoc
+
+  3. API Integration
+
+  - Valida contra documentation/api-spec.yml
+  - Genera servicios TypeScript desde OpenAPI
+  - Manejo de errores consistente
+  - Sincronización con Prisma schema
+
+  4. Testing & Quality
+
+  - Genera tests Jest para componentes
+  - Crea tests E2E con Cypress
+  - Fixtures y mocks reutilizables
+  - Target: 90% coverage
+
+  5. TypeScript Migration
+
+  - Migra .js → .tsx (8 componentes pendientes)
+  - Convierte PropTypes a interfaces
+  - Genera tipos desde Prisma schema
+  - Elimina tipos any
+
+  6. Performance Optimization
+
+  - Análisis de re-renders (React.memo, useMemo,
+  useCallback)
+  - Reducción de bundle size (code splitting, lazy loading)
+  - Virtualización de listas (react-window)
+  - Web Vitals monitoring (LCP, FID, CLS)
+
+  ---
+  🔗 MCP Servers Configurados
+
+  Ambos agentes tienen acceso a:
+  - figma-dev-mode-mcp-server (6 métodos)
+  - figma-local (6 métodos)
+
+  Métodos disponibles:
+  - get_code() - Generar código desde Figma
+  - get_screenshot() - Capturar diseños
+  - get_metadata() - Estructura de componentes
+  - get_variable_defs() - Variables de diseño
+  - get_code_connect_map() - Mapeo código-Figma
+  - create_design_system_rules() - Reglas de sistema de
+  diseño
+
+  ---
+  📋 Archivo README Incluido
+
+  Creé README.md en .claude/agents/ con:
+  - Descripción completa de cada agente
+  - Priorización por fase de proyecto
+  - Diagrama de colaboración entre agentes
+  - Guía de uso y contribución
+
+  ---
+  🚀 Próximos Pasos Recomendados
+
+  Prioridad Alta:
+  1. API Integration Agent - Sincronizar frontend con
+  api-spec.yml
+  2. Testing & Quality Agent - Alcanzar 90% coverage
+  3. TypeScript Migration Agent - Migrar los 8 componentes
+  .js restantes
+
+  Prioridad Media:
+  4. CSS & UX Auditor - Auditoría completa de estilos
+  5. Component Generator - Crear componentes faltantes
+
+  Prioridad Baja:
+  6. Performance Optimization - Optimizar cuando tengas más
+  usuarios/datos
+
+
+
+

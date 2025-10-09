@@ -1,0 +1,161 @@
+/**
+ * LTI Utility Classes
+ *
+ * Clases auxiliares que complementan las utilidades de Bootstrap.
+ * Siguen los principios de diseño del sistema LTI.
+ */
+
+/* === TEXTO === */
+
+.text-xxs {
+  font-size: var(--font-size-xs) !important;
+}
+
+.text-xs {
+  font-size: var(--font-size-xs);
+}
+
+.font-weight-medium {
+  font-weight: var(--font-weight-medium);
+}
+
+.font-weight-semibold {
+  font-weight: var(--font-weight-semibold);
+}
+
+/* === LOGO === */
+
+.logo-sm {
+  width: var(--logo-width-sm);
+  height: auto;
+}
+
+.logo-md {
+  width: var(--logo-width-md);
+  height: auto;
+}
+
+.logo-lg {
+  width: var(--logo-width-lg);
+  height: auto;
+}
+
+/* === TABLA === */
+
+.table-header {
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--spacing-3);
+}
+
+.table-cell {
+  padding: var(--spacing-3);
+}
+
+.table-cell-narrow {
+  padding: var(--spacing-3);
+  width: 60px;
+}
+
+.table-sort-icon {
+  margin-left: var(--spacing-1);
+  font-size: var(--font-size-xs);
+}
+
+.table-sort-icon-inactive {
+  color: var(--color-text-muted);
+}
+
+.table-action-btn {
+  box-shadow: none !important;
+}
+
+/* === RATING (ESTRELLAS) === */
+
+.rating-star {
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: var(--transition-fast);
+  user-select: none;
+}
+
+.rating-star-active {
+  color: #ffc107;
+}
+
+.rating-star-inactive {
+  color: var(--color-text-muted);
+}
+
+.rating-star:hover {
+  transform: scale(1.1);
+}
+
+/* === PAGINACIÓN === */
+
+.pagination-info {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* === CURSOR === */
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-default {
+  cursor: default;
+}
+
+/* === TRANSICIONES === */
+
+.transition-base {
+  transition: var(--transition-base);
+}
+
+.transition-fast {
+  transition: var(--transition-fast);
+}
+
+.transition-slow {
+  transition: var(--transition-slow);
+}
+
+/* === HOVER EFFECTS === */
+
+.hover-shadow {
+  transition: var(--transition-base);
+}
+
+.hover-shadow:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+/* === RESPONSIVE UTILITIES === */
+
+@media (max-width: 768px) {
+  .table-responsive-text {
+    font-size: var(--font-size-sm);
+  }
+
+  .logo-responsive {
+    width: var(--logo-width-sm);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .logo-responsive {
+    width: var(--logo-width-md);
+  }
+}
+
+@media (min-width: 1025px) {
+  .logo-responsive {
+    width: var(--logo-width-md);
+  }
+}

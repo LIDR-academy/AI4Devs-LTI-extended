@@ -1,0 +1,93 @@
+/**
+ * LTI Design Tokens
+ *
+ * Este archivo define los tokens de diseño del sistema LTI.
+ * Todos los componentes deben usar estas variables CSS en lugar de valores hardcodeados.
+ */
+
+:root {
+  /* === COLORES === */
+
+  /* Colores primarios */
+  --color-primary: #0d6efd;
+  --color-primary-hover: #0b5ed7;
+  --color-secondary: #6c757d;
+
+  /* Colores de estado */
+  --color-success: #198754;
+  --color-danger: #dc3545;
+  --color-warning: #ffc107;
+  --color-info: #0dcaf0;
+
+  /* Colores de texto */
+  --color-text-primary: #212529;
+  --color-text-secondary: #6c757d;
+  --color-text-muted: #adb5bd;
+
+  /* Colores de fondo */
+  --color-bg-light: #f8f9fa;
+  --color-bg-white: #ffffff;
+
+  /* === TIPOGRAFÍA === */
+
+  /* Tamaños de fuente */
+  --font-size-xs: 0.75rem;      /* 12px */
+  --font-size-sm: 0.875rem;     /* 14px */
+  --font-size-base: 1rem;       /* 16px */
+  --font-size-lg: 1.125rem;     /* 18px */
+  --font-size-xl: 1.25rem;      /* 20px */
+  --font-size-2xl: 1.5rem;      /* 24px */
+
+  /* Peso de fuente */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* === ESPACIADO === */
+
+  /* Basado en la escala de Bootstrap (1rem = 16px) */
+  --spacing-1: 0.25rem;   /* 4px */
+  --spacing-2: 0.5rem;    /* 8px */
+  --spacing-3: 1rem;      /* 16px */
+  --spacing-4: 1.5rem;    /* 24px */
+  --spacing-5: 3rem;      /* 48px */
+
+  /* === SOMBRAS === */
+
+  --shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
+  --shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+  --shadow-lg: 0 1rem 3rem rgba(0,0,0,.175);
+
+  /* === BORDES === */
+
+  --border-radius-sm: 0.25rem;
+  --border-radius: 0.375rem;
+  --border-radius-lg: 0.5rem;
+  --border-radius-pill: 50rem;
+
+  --border-width: 1px;
+  --border-color: #dee2e6;
+
+  /* === TRANSICIONES === */
+
+  --transition-base: all 0.2s ease-in-out;
+  --transition-fast: all 0.15s ease-in-out;
+  --transition-slow: all 0.3s ease-in-out;
+
+  /* === ANCHOS === */
+
+  --logo-width-sm: 100px;
+  --logo-width-md: 150px;
+  --logo-width-lg: 200px;
+
+  /* === Z-INDEX === */
+
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
