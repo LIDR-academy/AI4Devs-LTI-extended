@@ -1,5 +1,5 @@
 # Memory Bank - Exclude from Cursor indexing
-@memory-bank-rules.mdc
+.cursor/rules/@memory-bank-rules.mdc
 @memory-bank/
 # @backend/documentation/
 # @ats-readme.md
