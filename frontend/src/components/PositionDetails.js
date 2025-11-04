@@ -78,21 +78,42 @@ const PositionsDetails = () => {
     };
 
     const onDragEnd = (result) => {
-        const { source, destination } = result;
+        const { source, destination, draggableId } = result;
 
         if (!destination) {
             return;
         }
 
-        const sourceStage = stages[source.droppableId];
-        const destStage = stages[destination.droppableId];
+        // Convert droppableId to number since it's stored as string in StageColumn
+        const sourceStageIndex = Number(source.droppableId);
+        const destStageIndex = Number(destination.droppableId);
 
-        const [movedCandidate] = sourceStage.candidates.splice(source.index, 1);
-        destStage.candidates.splice(destination.index, 0, movedCandidate);
+        const sourceStage = stages[sourceStageIndex];
+        const destStage = stages[destStageIndex];
+
+        // Find the candidate by draggableId instead of using index
+        // This ensures we get the correct candidate even when the array is sorted
+        const candidateIndex = sourceStage.candidates.findIndex(
+            candidate => candidate.id === draggableId
+        );
+
+        if (candidateIndex === -1) {
+            console.error('Candidate not found in source stage');
+            return;
+        }
+
+        // Remove the candidate from source stage
+        const [movedCandidate] = sourceStage.candidates.splice(candidateIndex, 1);
+        
+        // Insert at the destination index (ensure it's within bounds)
+        // Note: destination.index is from the sorted view, but we insert into unsorted array
+        // The array will be re-sorted on next render, so position is approximate
+        const insertIndex = Math.min(destination.index, destStage.candidates.length);
+        destStage.candidates.splice(insertIndex, 0, movedCandidate);
 
         setStages([...stages]);
 
-        const destStageId = stages[destination.droppableId].id;
+        const destStageId = destStage.id;
 
         updateCandidateStep(movedCandidate.id, movedCandidate.applicationId, destStageId);
     };
