@@ -109,3 +109,121 @@ export const validateCandidateData = (data: any) => {
         validateCV(data.cv);
     }
 };
+
+export const validatePositionUpdate = (data: any): void => {
+    // Title validation
+    if (data.title !== undefined) {
+        if (typeof data.title !== 'string' || data.title.trim().length === 0) {
+            throw new Error('El título es obligatorio y debe ser una cadena válida');
+        }
+        if (data.title.length > 100) {
+            throw new Error('El título no puede exceder 100 caracteres');
+        }
+    }
+
+    // Description validation
+    if (data.description !== undefined) {
+        if (typeof data.description !== 'string' || data.description.trim().length === 0) {
+            throw new Error('La descripción es obligatoria y debe ser una cadena válida');
+        }
+    }
+
+    // Location validation
+    if (data.location !== undefined) {
+        if (typeof data.location !== 'string' || data.location.trim().length === 0) {
+            throw new Error('La ubicación es obligatoria y debe ser una cadena válida');
+        }
+    }
+
+    // JobDescription validation
+    if (data.jobDescription !== undefined) {
+        if (typeof data.jobDescription !== 'string' || data.jobDescription.trim().length === 0) {
+            throw new Error('La descripción del trabajo es obligatoria y debe ser una cadena válida');
+        }
+    }
+
+    // Status validation
+    if (data.status !== undefined) {
+        const validStatuses = ['Open', 'Contratado', 'Cerrado', 'Borrador'];
+        if (!validStatuses.includes(data.status)) {
+            throw new Error('Estado inválido. Debe ser uno de: Open, Contratado, Cerrado, Borrador');
+        }
+    }
+
+    // isVisible validation
+    if (data.isVisible !== undefined) {
+        if (typeof data.isVisible !== 'boolean') {
+            throw new Error('isVisible debe ser un valor booleano');
+        }
+    }
+
+    // companyId validation
+    if (data.companyId !== undefined) {
+        if (typeof data.companyId !== 'number' || !Number.isInteger(data.companyId) || data.companyId < 1) {
+            throw new Error('companyId debe ser un número entero positivo');
+        }
+    }
+
+    // interviewFlowId validation
+    if (data.interviewFlowId !== undefined) {
+        if (typeof data.interviewFlowId !== 'number' || !Number.isInteger(data.interviewFlowId) || data.interviewFlowId < 1) {
+            throw new Error('interviewFlowId debe ser un número entero positivo');
+        }
+    }
+
+    // salaryMin validation
+    if (data.salaryMin !== undefined) {
+        if (typeof data.salaryMin !== 'number' || isNaN(data.salaryMin) || data.salaryMin < 0) {
+            throw new Error('El salario mínimo debe ser un número válido mayor o igual a 0');
+        }
+    }
+
+    // salaryMax validation
+    if (data.salaryMax !== undefined) {
+        if (typeof data.salaryMax !== 'number' || isNaN(data.salaryMax) || data.salaryMax < 0) {
+            throw new Error('El salario máximo debe ser un número válido mayor o igual a 0');
+        }
+    }
+
+    // Salary range validation (both must be provided for this check)
+    if (data.salaryMin !== undefined && data.salaryMax !== undefined) {
+        if (data.salaryMin > data.salaryMax) {
+            throw new Error('El salario mínimo no puede ser mayor que el máximo');
+        }
+    }
+
+    // applicationDeadline validation
+    if (data.applicationDeadline !== undefined) {
+        const deadline = data.applicationDeadline instanceof Date 
+            ? data.applicationDeadline 
+            : new Date(data.applicationDeadline);
+        
+        if (isNaN(deadline.getTime())) {
+            throw new Error('Fecha límite inválida');
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const deadlineDate = new Date(deadline);
+        deadlineDate.setHours(0, 0, 0, 0);
+
+        if (deadlineDate < today) {
+            throw new Error('La fecha límite no puede ser anterior a hoy');
+        }
+    }
+
+    // employmentType validation
+    if (data.employmentType !== undefined) {
+        if (typeof data.employmentType !== 'string' || data.employmentType.trim().length === 0) {
+            throw new Error('El tipo de empleo debe ser una cadena válida');
+        }
+    }
+
+    // Text fields validation (optional string fields)
+    const textFields = ['requirements', 'responsibilities', 'benefits', 'companyDescription', 'contactInfo'];
+    for (const field of textFields) {
+        if (data[field] !== undefined && typeof data[field] !== 'string') {
+            throw new Error(`${field} debe ser una cadena válida`);
+        }
+    }
+};

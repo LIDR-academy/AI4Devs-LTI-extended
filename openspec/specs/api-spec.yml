@@ -264,7 +264,9 @@ paths:
     
     put:
       summary: Update position
-      description: Update an existing position with new information
+      description: |
+        Update an existing position with new information. Supports partial updates - only fields provided in the request body will be updated.
+        Fields not provided will maintain their existing values in the database.
       tags:
         - Positions
       parameters:
