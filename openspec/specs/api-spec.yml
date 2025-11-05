@@ -262,6 +262,103 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+    put:
+      summary: Update position details
+      description: Update details of an existing position including title, description, status, salary, and other fields. Supports partial updates - only provided fields will be updated.
+      tags:
+        - Positions
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: Position ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePositionRequest'
+            examples:
+              fullUpdate:
+                summary: Full update with all fields
+                value:
+                  title: "Senior Software Engineer"
+                  description: "Lead development team"
+                  location: "Madrid, Spain"
+                  jobDescription: "Detailed job description..."
+                  status: "Open"
+                  isVisible: true
+                  requirements: "5+ years experience"
+                  responsibilities: "Team leadership"
+                  salaryMin: 50000
+                  salaryMax: 70000
+                  employmentType: "Full-time"
+                  benefits: "Health insurance"
+                  companyDescription: "Tech company"
+                  applicationDeadline: "2025-12-31T23:59:59.000Z"
+                  contactInfo: "hr@company.com"
+                  companyId: 1
+                  interviewFlowId: 1
+              partialUpdate:
+                summary: Partial update (title and status only)
+                value:
+                  title: "Updated Position Title"
+                  status: "Cerrado"
+      responses:
+        '200':
+          description: Position updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdatePositionResponse'
+        '400':
+          description: Validation error, invalid reference data, invalid position ID format, or no data provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validationError:
+                  summary: Validation error
+                  value:
+                    message: "Validation error"
+                    error: "El título es obligatorio y debe ser una cadena válida"
+                invalidReference:
+                  summary: Invalid reference data
+                  value:
+                    message: "Invalid reference data"
+                    error: "Company not found"
+                invalidId:
+                  summary: Invalid position ID format
+                  value:
+                    message: "Invalid position ID format"
+                    error: "Position ID must be a valid number"
+                emptyBody:
+                  summary: No data provided
+                  value:
+                    message: "No data provided for update"
+                    error: "Request body cannot be empty"
+        '404':
+          description: Position not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Position not found"
+                error: "Position not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Error updating position"
+                error: "Unexpected error details"
+
   /positions/{id}/candidates:
     get:
       summary: Get candidates by position
@@ -557,6 +654,107 @@ components:
           example: "Candidate stage updated successfully"
         data:
           $ref: '#/components/schemas/Application'
+
+    UpdatePositionRequest:
+      type: object
+      description: Position update request body. All fields are optional to support partial updates.
+      properties:
+        title:
+          type: string
+          maxLength: 100
+          description: Position title
+          example: "Senior Software Engineer"
+        description:
+          type: string
+          description: Position description
+          example: "Lead development team"
+        location:
+          type: string
+          description: Position location
+          example: "Madrid, Spain"
+        jobDescription:
+          type: string
+          description: Detailed job description
+          example: "Responsible for leading the development team..."
+        status:
+          type: string
+          enum: [Open, Contratado, Cerrado, Borrador]
+          description: Position status
+          example: "Open"
+        isVisible:
+          type: boolean
+          description: Whether position is visible to candidates
+          example: true
+        requirements:
+          type: string
+          nullable: true
+          description: Position requirements
+          example: "5+ years of experience in software development"
+        responsibilities:
+          type: string
+          nullable: true
+          description: Position responsibilities
+          example: "Team leadership and project management"
+        salaryMin:
+          type: number
+          minimum: 0
+          nullable: true
+          description: Minimum salary
+          example: 50000
+        salaryMax:
+          type: number
+          minimum: 0
+          nullable: true
+          description: Maximum salary
+          example: 70000
+        employmentType:
+          type: string
+          nullable: true
+          description: Type of employment
+          example: "Full-time"
+        benefits:
+          type: string
+          nullable: true
+          description: Position benefits
+          example: "Health insurance, remote work"
+        companyDescription:
+          type: string
+          nullable: true
+          description: Company description
+          example: "Leading tech company"
+        applicationDeadline:
+          type: string
+          format: date-time
+          nullable: true
+          description: Application deadline (must be a future date)
+          example: "2025-12-31T23:59:59.000Z"
+        contactInfo:
+          type: string
+          nullable: true
+          description: Contact information
+          example: "hr@company.com"
+        companyId:
+          type: integer
+          minimum: 1
+          description: Associated company ID (must exist in database)
+          example: 1
+        interviewFlowId:
+          type: integer
+          minimum: 1
+          description: Associated interview flow ID (must exist in database)
+          example: 1
+
+    UpdatePositionResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Position updated successfully"
+        data:
+          $ref: '#/components/schemas/Position'
+      required:
+        - message
+        - data
 
     Position:
       type: object

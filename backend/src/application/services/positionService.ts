@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { Position } from '../../domain/models/Position';
+import { validatePositionUpdate } from '../validator';
 
 const prisma = new PrismaClient();
 
@@ -109,5 +110,64 @@ export const getCandidateNamesByPositionService = async (positionId: number) => 
     } catch (error) {
         console.error('Error retrieving candidate names by position:', error);
         throw new Error('Error retrieving candidate names by position');
+    }
+};
+
+/**
+ * Updates a position with the provided data
+ * @param positionId - The ID of the position to update
+ * @param updateData - The data to update the position with
+ * @returns The updated position object
+ * @throws Error if position not found, validation fails, or reference data is invalid
+ */
+export const updatePositionService = async (positionId: number, updateData: any) => {
+    try {
+        // Validate position ID
+        if (!Number.isInteger(positionId) || positionId <= 0) {
+            throw new Error('Invalid position ID');
+        }
+
+        // Fetch the position
+        const position = await Position.findOne(positionId);
+        if (!position) {
+            throw new Error('Position not found');
+        }
+
+        // Validate the update data
+        validatePositionUpdate(updateData);
+
+        // Verify companyId exists if provided
+        if (updateData.companyId !== undefined) {
+            const company = await prisma.company.findUnique({
+                where: { id: updateData.companyId }
+            });
+            if (!company) {
+                throw new Error('Company not found');
+            }
+        }
+
+        // Verify interviewFlowId exists if provided
+        if (updateData.interviewFlowId !== undefined) {
+            const interviewFlow = await prisma.interviewFlow.findUnique({
+                where: { id: updateData.interviewFlowId }
+            });
+            if (!interviewFlow) {
+                throw new Error('Interview flow not found');
+            }
+        }
+
+        // Update position properties with provided data
+        Object.keys(updateData).forEach(key => {
+            if (updateData[key] !== undefined) {
+                (position as any)[key] = updateData[key];
+            }
+        });
+
+        // Save the updated position
+        const updatedPosition = await position.save();
+        return updatedPosition;
+    } catch (error) {
+        console.error('Error updating position:', error);
+        throw error;
     }
 };
