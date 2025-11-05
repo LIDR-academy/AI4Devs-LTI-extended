@@ -1,0 +1,228 @@
+---
+description: Unit testing standards and best practices for the LTI project
+globs: ["**/*.test.ts", "**/*.spec.ts", "**/__tests__/**"]
+alwaysApply: true
+---
+
+# LTI Project Testing Standards
+
+## Unit Testing Rules and Best Practices
+
+### Test File Structure
+- Use descriptive test file names: `[componentName].test.ts`
+- Place test files alongside the source code they test
+- Use Jest as the testing framework with TypeScript support
+- Maintain 90% coverage threshold for branches, functions, lines, and statements
+
+### Test Organization Pattern
+```typescript
+describe('[ComponentName] - [methodName]', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('should_[expected_behavior]_when_[condition]', () => {
+    it('should [specific test case]', async () => {
+      // Arrange
+      // Act  
+      // Assert
+    });
+  });
+});
+```
+
+### Mocking Standards
+- Mock all external dependencies (models, services, database clients)
+- Use `jest.mock()` at the top of test files for module-level mocking
+- Create mock instances with realistic data structures
+- Clear all mocks in `beforeEach()` to ensure test isolation
+
+### Test Case Naming Convention
+- Use descriptive, behavior-driven naming: `should_[expected_behavior]_when_[condition]`
+- Group related test cases under descriptive `describe` blocks
+- Use snake_case for describe blocks and camelCase for individual tests
+
+### Test Structure (AAA Pattern)
+Always follow the Arrange-Act-Assert pattern:
+```typescript
+it('should update candidate stage successfully when valid data provided', async () => {
+  // Arrange - Set up test data and mocks
+  const candidateId = 1;
+  const applicationId = 1;
+  const newInterviewStep = 2;
+  
+  // Act - Execute the function under test
+  const result = await updateCandidateStage(candidateId, applicationId, newInterviewStep);
+  
+  // Assert - Verify the expected behavior
+  expect(result).toEqual(expectedResult);
+});
+```
+
+### Comprehensive Test Coverage
+Include these test categories for each function:
+1. **Happy Path Tests**: Valid inputs producing expected outputs
+2. **Error Handling Tests**: Invalid inputs, missing data, database errors
+3. **Edge Cases**: Boundary values, null/undefined inputs, empty data
+4. **Validation Tests**: Input validation, business rule enforcement
+5. **Integration Points**: External service calls, database operations
+
+### Mock Data Standards
+- Create realistic mock data that reflects actual domain models
+- Use consistent mock data across related tests
+- Include all required fields with appropriate types
+- Use meaningful test values (not just `1`, `'test'`, etc.)
+
+### Assertion Patterns
+- Use specific matchers: `toHaveBeenCalledWith()`, `toHaveBeenCalledTimes()`
+- Verify both successful operations and error conditions
+- Check that mocks were called with correct parameters
+- Assert on return values and side effects
+
+### Error Testing
+- Test both expected errors and unexpected errors
+- Verify error messages are descriptive and helpful
+- Test error propagation through service layers
+- Ensure proper HTTP status codes in controller tests
+
+### Controller Testing Specifics
+- Mock the service layer completely
+- Test HTTP request/response handling
+- Verify parameter parsing and validation
+- Test error response formatting
+- Use realistic Express Request/Response mocks
+
+### Service Testing Specifics
+- Mock domain models and repositories
+- Test business logic in isolation
+- Verify data transformation and validation
+- Test error handling and edge cases
+- Mock external dependencies (Prisma, validators)
+
+### Database Testing
+- Mock Prisma client and all database operations
+- Test both successful and failed database operations
+- Verify correct database queries and parameters
+- Test transaction handling and rollback scenarios
+
+### Async Testing
+- Always use `async/await` for asynchronous operations
+- Use `Promise.allSettled()` for testing concurrent operations
+- Properly handle promise rejections in tests
+- Test timeout scenarios where applicable
+
+### Test Data Management
+- Use factory functions for creating test data
+- Keep test data consistent and realistic
+- Avoid hardcoded values in multiple places
+- Use meaningful test data that reflects real-world scenarios
+
+### Code Quality Standards
+
+#### TypeScript Usage
+- Use strict typing for all test parameters and return values
+- Define proper interfaces for mock data
+- Use type assertions sparingly and with proper justification
+- Leverage TypeScript's type system for better test reliability
+
+#### Documentation
+- Write clear, descriptive test names that explain the scenario
+- Add comments for complex test setups
+- Document any special test conditions or edge cases
+- Keep test code as readable as production code
+
+#### Performance Considerations
+- Keep tests fast and focused
+- Avoid unnecessary async operations in tests
+- Use appropriate mock strategies to avoid real I/O
+- Group related tests to minimize setup/teardown overhead
+
+### Integration with Development Workflow
+- Run tests before every commit
+- Ensure all tests pass before merging
+- Use test-driven development when appropriate
+- Update tests when modifying existing functionality
+- Maintain test coverage above the 90% threshold
+
+### Common Anti-Patterns to Avoid
+- Don't test implementation details, test behavior
+- Don't create overly complex test setups
+- Don't ignore failing tests or skip error scenarios
+- Don't use real database connections in unit tests
+- Don't create tests that depend on external services
+- Don't write tests that are too tightly coupled to implementation
+
+### Example Test Structure
+```typescript
+import { updateCandidateStage } from './candidateService';
+import { Application } from '../../domain/models/Application';
+
+// Mock the Application model
+jest.mock('../../domain/models/Application', () => ({
+  Application: {
+    findOneByPositionCandidateId: jest.fn(),
+  },
+}));
+
+const mockApplicationInstance = {
+  save: jest.fn(),
+  id: 1,
+  positionId: 1,
+  candidateId: 1,
+  currentInterviewStep: 1,
+  applicationDate: new Date('2024-01-01'),
+  notes: null,
+};
+
+describe('CandidateService - updateCandidateStage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('should_update_candidate_stage_successfully_when_valid_data_provided', () => {
+    it('should update candidate stage and return updated application', async () => {
+      // Arrange
+      const candidateId = 1;
+      const applicationId = 1;
+      const newInterviewStep = 2;
+      const expectedApplication = {
+        ...mockApplicationInstance,
+        currentInterviewStep: newInterviewStep,
+      };
+
+      (Application.findOneByPositionCandidateId as jest.Mock).mockResolvedValue(mockApplicationInstance);
+      mockApplicationInstance.save.mockResolvedValue(expectedApplication);
+
+      // Act
+      const result = await updateCandidateStage(candidateId, applicationId, newInterviewStep);
+
+      // Assert
+      expect(Application.findOneByPositionCandidateId).toHaveBeenCalledWith(applicationId, candidateId);
+      expect(mockApplicationInstance.currentInterviewStep).toBe(newInterviewStep);
+      expect(mockApplicationInstance.save).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expectedApplication);
+    });
+  });
+
+  describe('should_throw_NotFoundError_when_application_does_not_exist', () => {
+    it('should throw error when application not found', async () => {
+      // Arrange
+      const candidateId = 1;
+      const applicationId = 999;
+      const newInterviewStep = 2;
+
+      (Application.findOneByPositionCandidateId as jest.Mock).mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(updateCandidateStage(candidateId, applicationId, newInterviewStep))
+        .rejects
+        .toThrow('Application not found');
+      
+      expect(Application.findOneByPositionCandidateId).toHaveBeenCalledWith(applicationId, candidateId);
+      expect(mockApplicationInstance.save).not.toHaveBeenCalled();
+    });
+  });
+});
+```
+
+This testing standard ensures consistent, maintainable, and reliable test coverage across the LTI project while following established patterns and best practices.

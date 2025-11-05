@@ -25,7 +25,7 @@ export const positionService = {
     }
   },
 
-  // Update position
+  // Update position by ID
   updatePosition: async (id, positionData) => {
     try {
       const response = await axios.put(`${API_BASE_URL}/positions/${id}`, positionData);

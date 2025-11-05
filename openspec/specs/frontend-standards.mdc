@@ -1,3 +1,9 @@
+---
+description: Frontend development standards, best practices, and conventions for the LTI React application including component patterns, state management, UI/UX guidelines, and testing practices
+globs: ["frontend/src/**/*.{js,jsx,ts,tsx}", "frontend/cypress/**/*.{ts,js}", "frontend/tsconfig.json", "frontend/cypress.config.ts", "frontend/package.json"]
+alwaysApply: true
+---
+
 # Frontend Project Configuration and Best Practices
 
 ## Table of Contents
@@ -11,6 +17,7 @@
   - [Development Tools](#development-tools)
 - [Project Structure](#project-structure)
 - [Coding Standards](#coding-standards)
+  - [Language and Naming Conventions](#language-and-naming-conventions)
   - [Component Conventions](#component-conventions)
   - [State Management](#state-management)
   - [Service Layer Architecture](#service-layer-architecture)
@@ -94,6 +101,107 @@ frontend/
 ```
 
 ## Coding Standards
+
+### Language and Naming Conventions
+
+- **English Only**: All code, comments, variable names, function names, component names, prop names, error messages, console logs, and documentation must be written in English
+- **Component Naming**: Use PascalCase for React components (e.g., `CandidateCard`, `PositionDetails`, `RecruiterDashboard`)
+- **Variable Naming**: Use camelCase for variables and functions (e.g., `candidateId`, `handleSubmit`, `fetchPositions`)
+- **Constants Naming**: Use UPPER_SNAKE_CASE for constants (e.g., `MAX_CANDIDATES_PER_PAGE`, `API_BASE_URL`)
+- **Type/Interface Naming**: Use PascalCase for types and interfaces (e.g., `CandidateData`, `PositionProps`, `ICandidateService`)
+- **File Naming**: Use PascalCase for component files (e.g., `CandidateCard.tsx`, `PositionDetails.tsx`) and camelCase for utility files (e.g., `candidateService.js`, `apiUtils.ts`)
+- **CSS Class Naming**: Use kebab-case for CSS classes (e.g., `candidate-card`, `position-details`)
+- **Hook Naming**: Use camelCase starting with "use" prefix (e.g., `useCandidate`, `usePositionData`, `useFormValidation`)
+
+**Examples:**
+
+```typescript
+// Good: All in English
+import React, { useState, useEffect } from 'react';
+
+type CandidateCardProps = {
+    candidate: Candidate;
+    index: number;
+    onClick: (candidate: Candidate) => void;
+};
+
+const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, index, onClick }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    
+    // Handle candidate card click event
+    const handleCardClick = () => {
+        onClick(candidate);
+    };
+    
+    return (
+        <div className="candidate-card" onClick={handleCardClick}>
+            {/* Component JSX */}
+        </div>
+    );
+};
+
+// Avoid: Non-English comments or names
+const TarjetaCandidato: React.FC<PropsTarjetaCandidato> = ({ candidato, indice, alHacerClic }) => {
+    const [estaCargando, setEstaCargando] = useState(false);
+    
+    // Manejar evento de clic en la tarjeta de candidato
+    const manejarClicTarjeta = () => {
+        alHacerClic(candidato);
+    };
+    
+    return (
+        <div className="tarjeta-candidato" onClick={manejarClicTarjeta}>
+            {/* JSX del componente */}
+        </div>
+    );
+};
+```
+
+**Error Messages and Console Logs:**
+
+```typescript
+// Good: English error messages
+catch (error) {
+    console.error('Failed to fetch candidates:', error);
+    setError('Unable to load candidates. Please try again later.');
+}
+
+// Avoid: Non-English messages
+catch (error) {
+    console.error('Error al obtener candidatos:', error);
+    setError('No se pudieron cargar los candidatos. Por favor, inténtelo de nuevo más tarde.');
+}
+```
+
+**Service Layer Examples:**
+
+```typescript
+// Good: English naming in services
+export const candidateService = {
+    getAllCandidates: async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/candidates`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching candidates:', error);
+            throw error;
+        }
+    }
+};
+
+// Avoid: Non-English naming
+export const servicioCandidatos = {
+    obtenerTodosLosCandidatos: async () => {
+        try {
+            const respuesta = await axios.get(`${API_BASE_URL}/candidates`);
+            return respuesta.data;
+        } catch (error) {
+            console.error('Error al obtener candidatos:', error);
+            throw error;
+        }
+    }
+};
+```
 
 ### Component Conventions
 
@@ -387,11 +495,10 @@ export default defineConfig({
 
 ## Development Workflow
 
-### Git Workflow
-- **Feature branch** development
-- **Descriptive commit messages** in English
-- **Code review** before merging
-- **Keep branches small** and focused
+- **Feature Branches**: Develop features in separate branches, adding descriptive suffix "-frontend" to allow working in parallel and avoid conflicts or collisions
+- **Descriptive Commits**: Write descriptive commit messages in English
+- **Code Review**: Code review before merging
+- **Small Branches**: Keep branches small and focused
 
 ### Development Scripts
 ```bash
@@ -422,4 +529,4 @@ npm run cypress:run     # Run Cypress tests headlessly
 - **React Bootstrap** components for consistency
 - **Responsive design** principles throughout
 
-This document serves as the foundation for maintaining code quality and consistency across the LTI frontend application. All team members should follow these practices to ensure a maintainable and scalable codebase. 
+This document serves as the foundation for maintaining code quality and consistency across the LTI frontend application. All team members should follow these practices to ensure a maintainable and scalable codebase.

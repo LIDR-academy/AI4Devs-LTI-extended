@@ -114,24 +114,30 @@ export const getCandidateNamesByPositionService = async (positionId: number) => 
 };
 
 /**
- * Actualiza una posición existente
- * @param positionId - ID de la posición a actualizar
- * @param updateData - Datos a actualizar
- * @returns Posición actualizada
+ * Updates a position with the provided data
+ * @param positionId - The ID of the position to update
+ * @param updateData - The data to update the position with
+ * @returns The updated position object
+ * @throws Error if position not found, validation fails, or reference data is invalid
  */
 export const updatePositionService = async (positionId: number, updateData: any) => {
     try {
-        // Validar que la posición existe
-        const existingPosition = await Position.findOne(positionId);
-        if (!existingPosition) {
+        // Validate position ID
+        if (!Number.isInteger(positionId) || positionId <= 0) {
+            throw new Error('Invalid position ID');
+        }
+
+        // Fetch the position
+        const position = await Position.findOne(positionId);
+        if (!position) {
             throw new Error('Position not found');
         }
 
-        // Validar los datos de entrada
+        // Validate the update data
         validatePositionUpdate(updateData);
 
-        // Verificar que companyId e interviewFlowId existen si se están actualizando
-        if (updateData.companyId) {
+        // Verify companyId exists if provided
+        if (updateData.companyId !== undefined) {
             const company = await prisma.company.findUnique({
                 where: { id: updateData.companyId }
             });
@@ -140,7 +146,8 @@ export const updatePositionService = async (positionId: number, updateData: any)
             }
         }
 
-        if (updateData.interviewFlowId) {
+        // Verify interviewFlowId exists if provided
+        if (updateData.interviewFlowId !== undefined) {
             const interviewFlow = await prisma.interviewFlow.findUnique({
                 where: { id: updateData.interviewFlowId }
             });
@@ -149,21 +156,18 @@ export const updatePositionService = async (positionId: number, updateData: any)
             }
         }
 
-        // Actualizar la posición usando el modelo de dominio
-        const updatedPosition = new Position({
-            ...existingPosition,
-            ...updateData,
-            id: positionId
+        // Update position properties with provided data
+        Object.keys(updateData).forEach(key => {
+            if (updateData[key] !== undefined) {
+                (position as any)[key] = updateData[key];
+            }
         });
 
-        const result = await updatedPosition.save();
-        
-        return result;
+        // Save the updated position
+        const updatedPosition = await position.save();
+        return updatedPosition;
     } catch (error) {
         console.error('Error updating position:', error);
-        if (error instanceof Error) {
-            throw error;
-        }
-        throw new Error('Error updating position');
+        throw error;
     }
 };
