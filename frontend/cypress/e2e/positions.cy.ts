@@ -283,4 +283,173 @@ describe('Positions API - Update', () => {
       });
     });
   });
+});
+
+describe('Position Edit UI Workflow', () => {
+  const API_URL = Cypress.env('API_URL') || 'http://localhost:3010';
+  let testPositionId: number;
+
+  before(() => {
+    // Get an existing position for testing
+    cy.request({
+      method: 'GET',
+      url: `${API_URL}/positions`
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+      expect(response.body).to.be.an('array');
+      if (response.body.length > 0) {
+        testPositionId = response.body[0].id;
+      } else {
+        throw new Error('No positions available for testing. Please ensure test data exists.');
+      }
+    });
+  });
+
+  beforeEach(() => {
+    cy.window().then((win) => {
+      win.localStorage.clear();
+    });
+  });
+
+  it('should navigate to edit page when clicking Editar button', () => {
+    cy.visit('/positions');
+    cy.get(`[data-testid="edit-position-${testPositionId}"]`).should('exist').click();
+    cy.url().should('include', `/positions/${testPositionId}/edit`);
+  });
+
+  it('should display edit form with position data loaded', () => {
+    cy.visit(`/positions/${testPositionId}/edit`);
+    
+    // Verify form fields are present
+    cy.get('[data-testid="position-title-input"]').should('exist');
+    cy.get('[data-testid="position-status-select"]').should('exist');
+    cy.get('[data-testid="position-description-input"]').should('exist');
+    cy.get('[data-testid="position-location-input"]').should('exist');
+    cy.get('[data-testid="position-job-description-input"]').should('exist');
+    cy.get('[data-testid="position-requirements-input"]').should('exist');
+    cy.get('[data-testid="position-responsibilities-input"]').should('exist');
+    cy.get('[data-testid="position-salary-min-input"]').should('exist');
+    cy.get('[data-testid="position-salary-max-input"]').should('exist');
+    cy.get('[data-testid="position-benefits-input"]').should('exist');
+    cy.get('[data-testid="position-company-description-input"]').should('exist');
+    cy.get('[data-testid="position-deadline-input"]').should('exist');
+    cy.get('[data-testid="position-contact-info-input"]').should('exist');
+    
+    // Verify form is populated with data (at least title should have value)
+    cy.get('[data-testid="position-title-input"]').should('have.value').and('not.be.empty');
+  });
+
+  it('should update position successfully', () => {
+    cy.visit(`/positions/${testPositionId}/edit`);
+    
+    // Wait for form to load
+    cy.get('[data-testid="position-title-input"]').should('exist');
+    
+    // Modify title and description
+    cy.get('[data-testid="position-title-input"]').clear().type('Updated Position Title');
+    cy.get('[data-testid="position-description-input"]').clear().type('Updated description text');
+    
+    // Click save button
+    cy.get('[data-testid="save-button"]').click();
+    
+    // Verify success message appears
+    cy.contains('Position updated successfully').should('be.visible');
+    
+    // Verify navigation to positions list after delay
+    cy.url({ timeout: 5000 }).should('include', '/positions');
+  });
+
+  it('should update status dropdown value', () => {
+    cy.visit(`/positions/${testPositionId}/edit`);
+    
+    cy.get('[data-testid="position-status-select"]').should('exist');
+    cy.get('[data-testid="position-status-select"]').select('Open');
+    
+    cy.get('[data-testid="save-button"]').click();
+    cy.contains('Position updated successfully').should('be.visible');
+  });
+
+  it('should handle salary range validation', () => {
+    cy.visit(`/positions/${testPositionId}/edit`);
+    
+    // Enter invalid salary range (min > max)
+    cy.get('[data-testid="position-salary-min-input"]').clear().type('90000');
+    cy.get('[data-testid="position-salary-max-input"]').clear().type('60000');
+    
+    cy.get('[data-testid="save-button"]').click();
+    
+    // Verify validation error message displayed (from backend)
+    cy.contains('mínimo no puede ser mayor que el máximo', { timeout: 5000 }).should('be.visible');
+  });
+
+  it('should navigate back when clicking Cancel button', () => {
+    cy.visit(`/positions/${testPositionId}/edit`);
+    
+    // Make changes to form
+    cy.get('[data-testid="position-title-input"]').clear().type('Unsaved Changes');
+    
+    // Click cancel button
+    cy.get('[data-testid="cancel-button"]').click();
+    
+    // Verify navigation to positions list
+    cy.url().should('include', '/positions');
+    
+    // Verify changes are not saved (title should not be updated)
+    cy.visit(`/positions/${testPositionId}/edit`);
+    cy.get('[data-testid="position-title-input"]').should('not.have.value', 'Unsaved Changes');
+  });
+
+  it('should display error message for invalid position ID', () => {
+    cy.visit('/positions/99999/edit');
+    
+    // Verify error message displayed
+    cy.contains('Position not found', { timeout: 5000 }).should('be.visible');
+  });
+
+  it('should show loading spinner during initial fetch', () => {
+    cy.visit(`/positions/${testPositionId}/edit`);
+    
+    // Loading spinner should appear briefly
+    cy.get('.spinner-border', { timeout: 1000 }).should('exist');
+    
+    // Form should load after spinner disappears
+    cy.get('[data-testid="position-title-input"]', { timeout: 5000 }).should('exist');
+  });
+
+  it('should disable Save button during save operation', () => {
+    cy.visit(`/positions/${testPositionId}/edit`);
+    
+    cy.get('[data-testid="position-title-input"]').clear().type('Test Save Disabled');
+    
+    cy.get('[data-testid="save-button"]').click();
+    
+    // Verify button shows "Guardando..." text
+    cy.contains('Guardando...').should('be.visible');
+    
+    // Verify button is disabled
+    cy.get('[data-testid="save-button"]').should('be.disabled');
+  });
+
+  it('should display back button and navigate correctly', () => {
+    cy.visit(`/positions/${testPositionId}/edit`);
+    
+    // Verify back button exists
+    cy.get('[data-testid="back-to-positions"]').should('exist').and('contain', 'Volver a Posiciones');
+    
+    // Click back button
+    cy.get('[data-testid="back-to-positions"]').click();
+    
+    // Verify navigation to positions list
+    cy.url().should('include', '/positions');
+  });
+
+  it('should format date field correctly', () => {
+    cy.visit(`/positions/${testPositionId}/edit`);
+    
+    // Wait for form to load
+    cy.get('[data-testid="position-deadline-input"]').should('exist');
+    
+    // Date input should accept date format YYYY-MM-DD
+    cy.get('[data-testid="position-deadline-input"]').should('have.attr', 'type', 'date');
+  });
 }); 

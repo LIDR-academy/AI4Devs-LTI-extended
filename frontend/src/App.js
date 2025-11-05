@@ -5,6 +5,7 @@ import RecruiterDashboard from './components/RecruiterDashboard';
 import AddCandidate from './components/AddCandidateForm';
 import Positions from './components/Positions';
 import PositionDetails from './components/PositionDetails';
+import EditPosition from './components/EditPosition';
 
 const App = () => {
   return (
@@ -13,6 +14,7 @@ const App = () => {
         <Route path="/" element={<RecruiterDashboard />} />
         <Route path="/add-candidate" element={<AddCandidate />} />
         <Route path="/positions" element={<Positions />} />
+        <Route path="/positions/:id/edit" element={<EditPosition />} />
         <Route path="/positions/:id" element={<PositionDetails />} />
       </Routes>
     </BrowserRouter>

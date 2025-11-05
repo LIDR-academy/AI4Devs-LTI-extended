@@ -100,6 +100,9 @@ const Positions: React.FC = () => {
                                     {position.status}
                                 </span>
                                 <div className="d-flex justify-content-between mt-3">
+                                    <Button variant="secondary" onClick={() => navigate(`/positions/${position.id}/edit`)} data-testid={`edit-position-${position.id}`}>
+                                        Editar
+                                    </Button>
                                     <Button variant="primary" onClick={() => navigate(`/positions/${position.id}`)}>Ver proceso</Button>
                                 </div>
                             </Card.Body>
