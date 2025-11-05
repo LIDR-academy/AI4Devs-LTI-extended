@@ -6,8 +6,7 @@ Follow these steps:
 2. Understand the problem described in the ticket
 3. Search the codebase for relevant files
 4. Start a new branch using the ID of the ticket (for example SCRUM-1)
-4. Implement the necessary changes to solve the ticket 
-5. Write and run tests to verify the solution
+5. Implement the necessary changes to solve the ticket, following the order of the different tasks and making sure you accomplish all of them in order, like writing and running tests to verify the solution, updating documentation, etc.
 6. Ensure code passes linting and type checking
 7. Stage only the files affected by the ticket, and leave any other file changed out of the commit. Create a descriptive commit message
 8. Push and create a PR, using the ID of the ticket (for example SCRUM-1) so it gets linked in Jira ticket
