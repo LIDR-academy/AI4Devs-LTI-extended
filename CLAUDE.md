@@ -2,6 +2,34 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Index
+
+- [Development Commands](#development-commands)
+  - [Backend (Node.js/TypeScript/Express)](#backend-nodetypesciptexpress)
+  - [Frontend (React/TypeScript)](#frontend-reacttypescript)
+  - [Database (PostgreSQL)](#database-postgresql)
+- [Architecture Overview](#architecture-overview)
+  - [Backend Architecture (Domain-Driven Design)](#backend-architecture-domain-driven-design)
+  - [Frontend Architecture](#frontend-architecture)
+  - [Data Model Core Entities](#data-model-core-entities)
+- [Key Patterns and Conventions](#key-patterns-and-conventions)
+  - [Backend Patterns](#backend-patterns)
+  - [Frontend Patterns](#frontend-patterns)
+  - [Database Patterns](#database-patterns)
+- [Testing Strategy](#testing-strategy)
+  - [Backend Testing (Jest)](#backend-testing-jest)
+  - [Frontend Testing](#frontend-testing)
+- [Development Environment](#development-environment)
+  - [Database Setup](#database-setup)
+  - [Port Configuration](#port-configuration)
+  - [Environment Files Required](#environment-files-required)
+- [API Patterns](#api-patterns)
+  - [REST Endpoints](#rest-endpoints)
+  - [Request/Response Patterns](#requestresponse-patterns)
+- [Serverless Deployment](#serverless-deployment)
+
+
+
 ## Development Commands
 
 ### Backend (Node.js/TypeScript/Express)
