@@ -1,6 +1,1 @@
-# Memory Bank - Exclude from Cursor indexing
-.cursor/rules/@memory-bank-rules.mdc
-@memory-bank/
-# @backend/documentation/
-# @ats-readme.md
 # @README.md
