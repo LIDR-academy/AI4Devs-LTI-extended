@@ -109,3 +109,92 @@ export const validateCandidateData = (data: any) => {
         validateCV(data.cv);
     }
 };
+
+export const validatePositionUpdate = (data: any): void => {
+    // Title validation
+    if (data.title !== undefined) {
+        if (!data.title || typeof data.title !== 'string' || data.title.trim().length === 0) {
+            throw new Error('Title is required and must be a valid string');
+        }
+        if (data.title.length > 100) {
+            throw new Error('Title cannot exceed 100 characters');
+        }
+    }
+
+    // Status validation
+    if (data.status !== undefined) {
+        const validStatuses = ['Open', 'Contratado', 'Cerrado', 'Borrador'];
+        if (!validStatuses.includes(data.status)) {
+            throw new Error('Invalid status. Must be one of: Open, Contratado, Cerrado, Borrador');
+        }
+    }
+
+    // Salary validation
+    if (data.salaryMin !== undefined) {
+        if (typeof data.salaryMin !== 'number' || data.salaryMin < 0) {
+            throw new Error('Minimum salary must be a valid number greater than or equal to 0');
+        }
+    }
+
+    if (data.salaryMax !== undefined) {
+        if (typeof data.salaryMax !== 'number' || data.salaryMax < 0) {
+            throw new Error('Maximum salary must be a valid number greater than or equal to 0');
+        }
+    }
+
+    // Salary range validation
+    if (data.salaryMin !== undefined && data.salaryMax !== undefined) {
+        if (data.salaryMin > data.salaryMax) {
+            throw new Error('Minimum salary cannot be greater than maximum salary');
+        }
+    }
+
+    // Application deadline validation
+    if (data.applicationDeadline !== undefined) {
+        const deadline = new Date(data.applicationDeadline);
+        if (isNaN(deadline.getTime())) {
+            throw new Error('Invalid application deadline');
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (deadline < today) {
+            throw new Error('Application deadline cannot be in the past');
+        }
+    }
+
+    // Boolean validation
+    if (data.isVisible !== undefined && typeof data.isVisible !== 'boolean') {
+        throw new Error('isVisible must be a boolean value');
+    }
+
+    // Integer validations
+    if (data.companyId !== undefined) {
+        if (!Number.isInteger(data.companyId) || data.companyId <= 0) {
+            throw new Error('companyId must be a positive integer');
+        }
+    }
+
+    if (data.interviewFlowId !== undefined) {
+        if (!Number.isInteger(data.interviewFlowId) || data.interviewFlowId <= 0) {
+            throw new Error('interviewFlowId must be a positive integer');
+        }
+    }
+
+    // String field validations
+    const stringFields = ['description', 'location', 'jobDescription', 'employmentType'];
+    for (const field of stringFields) {
+        if (data[field] !== undefined) {
+            if (!data[field] || typeof data[field] !== 'string' || data[field].trim().length === 0) {
+                throw new Error(`${field} is required and must be a valid string`);
+            }
+        }
+    }
+
+    // Optional string fields (can be empty but must be strings if provided)
+    const optionalStringFields = ['requirements', 'responsibilities', 'benefits', 'companyDescription', 'contactInfo'];
+    for (const field of optionalStringFields) {
+        if (data[field] !== undefined && typeof data[field] !== 'string') {
+            throw new Error(`${field} must be a string`);
+        }
+    }
+};

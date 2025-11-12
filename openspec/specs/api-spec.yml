@@ -264,7 +264,7 @@ paths:
     
     put:
       summary: Update position
-      description: Update an existing position with new information
+      description: Update an existing position with new information. Supports partial updates where only provided fields are updated.
       tags:
         - Positions
       parameters:
@@ -288,7 +288,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/UpdatePositionResponse'
         '400':
-          description: Validation error or invalid reference data
+          description: Validation error, invalid ID format, or invalid reference data
           content:
             application/json:
               schema:
@@ -682,38 +682,26 @@ components:
     UpdatePositionRequest:
       type: object
       properties:
-        companyId:
-          type: integer
-          minimum: 1
-          description: Associated company ID (must be a positive integer)
-        interviewFlowId:
-          type: integer
-          minimum: 1
-          description: Associated interview flow ID (must be a positive integer)
         title:
           type: string
           maxLength: 100
-          minLength: 1
-          description: Position title (required, 1-100 characters)
+          description: Position title
         description:
           type: string
-          minLength: 1
-          description: Position description (required, cannot be empty)
+          description: Brief position description
+        location:
+          type: string
+          description: Job location
+        jobDescription:
+          type: string
+          description: Detailed job description
         status:
           type: string
           enum: [Open, Contratado, Cerrado, Borrador]
-          description: Position status (must be one of the valid status values)
+          description: Position status
         isVisible:
           type: boolean
           description: Whether position is visible to candidates
-        location:
-          type: string
-          minLength: 1
-          description: Position location (required, cannot be empty)
-        jobDescription:
-          type: string
-          minLength: 1
-          description: Detailed job description (required, cannot be empty)
         requirements:
           type: string
           nullable: true
@@ -726,12 +714,12 @@ components:
           type: number
           minimum: 0
           nullable: true
-          description: Minimum salary (must be >= 0, cannot be greater than salaryMax)
+          description: Minimum salary
         salaryMax:
           type: number
           minimum: 0
           nullable: true
-          description: Maximum salary (must be >= 0, cannot be less than salaryMin)
+          description: Maximum salary (must be >= salaryMin)
         employmentType:
           type: string
           nullable: true
@@ -748,11 +736,20 @@ components:
           type: string
           format: date-time
           nullable: true
-          description: Application deadline (must be a future date)
+          description: Application deadline (must be future date)
         contactInfo:
           type: string
           nullable: true
           description: Contact information
+        companyId:
+          type: integer
+          minimum: 1
+          description: Associated company ID
+        interviewFlowId:
+          type: integer
+          minimum: 1
+          description: Associated interview flow ID
+      description: All fields are optional for partial updates. Only provided fields will be updated.
 
     UpdatePositionResponse:
       type: object
@@ -762,6 +759,9 @@ components:
           example: "Position updated successfully"
         data:
           $ref: '#/components/schemas/Position'
+      required:
+        - message
+        - data
 
     PositionCandidate:
       type: object

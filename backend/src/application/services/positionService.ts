@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { Position } from '../../domain/models/Position';
+import { validatePositionUpdate } from '../validator';
 
 const prisma = new PrismaClient();
 
@@ -110,4 +111,48 @@ export const getCandidateNamesByPositionService = async (positionId: number) => 
         console.error('Error retrieving candidate names by position:', error);
         throw new Error('Error retrieving candidate names by position');
     }
+};
+
+export const updatePositionService = async (positionId: number, updateData: any): Promise<any> => {
+    // Verify position exists
+    const existingPosition = await Position.findOne(positionId);
+    if (!existingPosition) {
+        throw new Error('Position not found');
+    }
+
+    // Validate update data
+    validatePositionUpdate(updateData);
+
+    // Validate company reference if provided
+    if (updateData.companyId !== undefined) {
+        const company = await prisma.company.findUnique({
+            where: { id: updateData.companyId }
+        });
+        if (!company) {
+            throw new Error('Company not found');
+        }
+    }
+
+    // Validate interview flow reference if provided
+    if (updateData.interviewFlowId !== undefined) {
+        const interviewFlow = await prisma.interviewFlow.findUnique({
+            where: { id: updateData.interviewFlowId }
+        });
+        if (!interviewFlow) {
+            throw new Error('Interview flow not found');
+        }
+    }
+
+    // Merge existing data with updates
+    const mergedData = {
+        ...existingPosition,
+        ...updateData,
+        id: positionId // Ensure ID is preserved
+    };
+
+    // Create Position instance and save
+    const position = new Position(mergedData);
+    const updatedPosition = await position.save();
+
+    return updatedPosition;
 };
