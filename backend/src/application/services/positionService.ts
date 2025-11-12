@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { Position } from '../../domain/models/Position';
+import { Company } from '../../domain/models/Company';
+import { InterviewFlow } from '../../domain/models/InterviewFlow';
 import { validatePositionUpdate } from '../validator';
 
 const prisma = new PrismaClient();
@@ -113,57 +115,39 @@ export const getCandidateNamesByPositionService = async (positionId: number) => 
     }
 };
 
-/**
- * Actualiza una posición existente
- * @param positionId - ID de la posición a actualizar
- * @param updateData - Datos a actualizar
- * @returns Posición actualizada
- */
-export const updatePositionService = async (positionId: number, updateData: any) => {
-    try {
-        // Validar que la posición existe
-        const existingPosition = await Position.findOne(positionId);
-        if (!existingPosition) {
-            throw new Error('Position not found');
-        }
-
-        // Validar los datos de entrada
-        validatePositionUpdate(updateData);
-
-        // Verificar que companyId e interviewFlowId existen si se están actualizando
-        if (updateData.companyId) {
-            const company = await prisma.company.findUnique({
-                where: { id: updateData.companyId }
-            });
-            if (!company) {
-                throw new Error('Company not found');
-            }
-        }
-
-        if (updateData.interviewFlowId) {
-            const interviewFlow = await prisma.interviewFlow.findUnique({
-                where: { id: updateData.interviewFlowId }
-            });
-            if (!interviewFlow) {
-                throw new Error('Interview flow not found');
-            }
-        }
-
-        // Actualizar la posición usando el modelo de dominio
-        const updatedPosition = new Position({
-            ...existingPosition,
-            ...updateData,
-            id: positionId
-        });
-
-        const result = await updatedPosition.save();
-        
-        return result;
-    } catch (error) {
-        console.error('Error updating position:', error);
-        if (error instanceof Error) {
-            throw error;
-        }
-        throw new Error('Error updating position');
+export const updatePositionService = async (positionId: number, updateData: any): Promise<any> => {
+    // Validate position exists
+    const position = await Position.findOne(positionId);
+    if (!position) {
+        throw new Error('Position not found');
     }
+
+    // Validate input data
+    validatePositionUpdate(updateData);
+
+    // Validate companyId exists if provided
+    if (updateData.companyId !== undefined) {
+        const company = await Company.findOne(updateData.companyId);
+        if (!company) {
+            throw new Error('Invalid reference data');
+        }
+    }
+
+    // Validate interviewFlowId exists if provided
+    if (updateData.interviewFlowId !== undefined) {
+        const interviewFlow = await InterviewFlow.findOne(updateData.interviewFlowId);
+        if (!interviewFlow) {
+            throw new Error('Invalid reference data');
+        }
+    }
+
+    // Update only provided fields (partial update)
+    Object.keys(updateData).forEach(key => {
+        if (updateData[key] !== undefined) {
+            (position as any)[key] = updateData[key];
+        }
+    });
+
+    // Save and return updated position
+    return await position.save();
 };
