@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getCandidatesByPositionService, getInterviewFlowByPositionService, getAllPositionsService, getCandidateNamesByPositionService, updatePositionService, getPositionByIdService } from '../../application/services/positionService';
+import { getCandidatesByPositionService, getInterviewFlowByPositionService, getAllPositionsService, getCandidateNamesByPositionService, getPositionByIdService, updatePositionService } from '../../application/services/positionService';
 
 
 export const getAllPositions = async (req: Request, res: Response) => {
@@ -89,79 +89,77 @@ export const getCandidateNamesByPosition = async (req: Request, res: Response) =
     }
 };
 
-/**
- * @route PUT /positions/:id
- * @description Actualiza una posición existente
- * @access Public
- */
-export const updatePosition = async (req: Request, res: Response) => {
+export const updatePosition = async (req: Request, res: Response): Promise<void> => {
     try {
+        // Parse and validate position ID
         const positionId = parseInt(req.params.id);
-        
-        // Validar que el ID es un número válido
         if (isNaN(positionId)) {
-            return res.status(400).json({ 
+            res.status(400).json({
                 message: 'Invalid position ID format',
                 error: 'Position ID must be a valid number'
             });
+            return;
         }
 
-        const updateData = req.body;
-        
-        // Validar que se envían datos para actualizar
-        if (!updateData || Object.keys(updateData).length === 0) {
-            return res.status(400).json({
+        // Validate request body is not empty
+        if (!req.body || Object.keys(req.body).length === 0) {
+            res.status(400).json({
                 message: 'No data provided for update',
                 error: 'Request body cannot be empty'
             });
+            return;
         }
 
-        const updatedPosition = await updatePositionService(positionId, updateData);
-        
+        // Call service layer
+        const updatedPosition = await updatePositionService(positionId, req.body);
+
+        // Success response
         res.status(200).json({
             message: 'Position updated successfully',
             data: updatedPosition
         });
     } catch (error) {
         if (error instanceof Error) {
-            // Manejar errores específicos
+            // Position not found
             if (error.message === 'Position not found') {
-                res.status(404).json({ 
-                    message: 'Position not found', 
-                    error: error.message 
+                res.status(404).json({
+                    message: 'Position not found',
+                    error: error.message
                 });
-            } else if (error.message.includes('Company not found') || 
-                      error.message.includes('Interview flow not found')) {
-                res.status(400).json({ 
-                    message: 'Invalid reference data', 
-                    error: error.message 
-                });
-            } else if (error.message.includes('inválido') || 
-                      error.message.includes('Invalid') ||
-                      error.message.includes('exceder') ||
-                      error.message.includes('mayor') ||
-                      error.message.includes('obligatorio') ||
-                      error.message.includes('debe ser') ||
-                      error.message.includes('no puede') ||
-                      error.message.includes('Estado inválido') ||
-                      error.message.includes('número válido') ||
-                      error.message.includes('cadena válida') ||
-                      error.message.includes('valor booleano') ||
-                      error.message.includes('número entero positivo')) {
-                res.status(400).json({ 
-                    message: 'Validation error', 
-                    error: error.message 
-                });
-            } else {
-                res.status(500).json({ 
-                    message: 'Error updating position', 
-                    error: error.message 
-                });
+                return;
             }
+
+            // Reference validation errors (company or interview flow not found)
+            if (error.message === 'Company not found' || error.message === 'Interview flow not found') {
+                res.status(400).json({
+                    message: 'Invalid reference data',
+                    error: error.message
+                });
+                return;
+            }
+
+            // Validation errors (from validatePositionUpdate)
+            if (error.message.includes('must be') || 
+                error.message.includes('cannot') || 
+                error.message.includes('required') ||
+                error.message.includes('Invalid')) {
+                res.status(400).json({
+                    message: 'Validation error',
+                    error: error.message
+                });
+                return;
+            }
+
+            // Other errors
+            res.status(500).json({
+                message: 'Error updating position',
+                error: error.message
+            });
         } else {
-            res.status(500).json({ 
-                message: 'Error updating position', 
-                error: 'Unknown error occurred' 
+            // Non-Error exceptions
+            res.status(500).json({
+                message: 'Error updating position',
+                error: 'An unexpected error occurred'
             });
         }
     }

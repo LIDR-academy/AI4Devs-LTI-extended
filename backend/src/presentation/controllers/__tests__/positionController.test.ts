@@ -1,469 +1,460 @@
 import { Request, Response } from 'express';
 import { updatePosition } from '../positionController';
-import { updatePositionService } from '../../application/services/positionService';
+import { updatePositionService } from '../../../application/services/positionService';
 
-jest.mock('../../application/services/positionService');
+// Mock the service layer
+jest.mock('../../../application/services/positionService');
 
-describe('updatePosition Controller', () => {
-  let mockRequest: Partial<Request>;
-  let mockResponse: Partial<Response>;
-  let mockStatus: jest.Mock;
-  let mockJson: jest.Mock;
+describe('PositionController - updatePosition', () => {
+    let mockRequest: Partial<Request>;
+    let mockResponse: Partial<Response>;
+    let mockJson: jest.Mock;
+    let mockStatus: jest.Mock;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    
-    mockStatus = jest.fn().mockReturnThis();
-    mockJson = jest.fn();
-    
-    mockResponse = {
-      status: mockStatus,
-      json: mockJson,
-    };
-  });
+    beforeEach(() => {
+        jest.clearAllMocks();
 
-  describe('Successful cases', () => {
-    it('should return 200 with updated position for valid data', async () => {
-      const mockUpdateData = {
-        title: 'Updated Senior Developer',
-        description: 'Updated description',
-        status: 'Open',
-        location: 'Madrid, Spain',
-        jobDescription: 'Updated job description'
-      };
+        mockJson = jest.fn();
+        mockStatus = jest.fn().mockReturnValue({ json: mockJson });
 
-      const mockUpdatedPosition = {
-        id: 1,
-        title: 'Updated Senior Developer',
-        status: 'Open',
-        updatedAt: '2024-01-15T10:30:00Z'
-      };
+        mockRequest = {
+            params: { id: '1' },
+            body: {}
+        };
 
-      mockRequest = {
-        params: { id: '1' },
-        body: mockUpdateData
-      };
-
-      (updatePositionService as jest.Mock).mockResolvedValue(mockUpdatedPosition);
-
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(updatePositionService).toHaveBeenCalledWith(1, mockUpdateData);
-      expect(mockStatus).toHaveBeenCalledWith(200);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'Position updated successfully',
-        data: mockUpdatedPosition
-      });
+        mockResponse = {
+            status: mockStatus,
+            json: mockJson
+        };
     });
 
-    it('should handle partial updates correctly', async () => {
-      const mockUpdateData = {
-        status: 'Cerrado'
-      };
+    describe('should_update_position_successfully', () => {
+        it('should return 200 with success message when update succeeds', async () => {
+            // Arrange
+            const updateData = { title: 'New Title', status: 'Open' };
+            const updatedPosition = { id: 1, ...updateData };
 
-      const mockUpdatedPosition = {
-        id: 1,
-        status: 'Cerrado'
-      };
+            mockRequest.params = { id: '1' };
+            mockRequest.body = updateData;
 
-      mockRequest = {
-        params: { id: '1' },
-        body: mockUpdateData
-      };
+            (updatePositionService as jest.Mock).mockResolvedValue(updatedPosition);
 
-      (updatePositionService as jest.Mock).mockResolvedValue(mockUpdatedPosition);
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
 
-      await updatePosition(mockRequest as Request, mockResponse as Response);
+            // Assert
+            expect(updatePositionService).toHaveBeenCalledWith(1, updateData);
+            expect(mockStatus).toHaveBeenCalledWith(200);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Position updated successfully',
+                data: updatedPosition
+            });
+        });
 
-      expect(updatePositionService).toHaveBeenCalledWith(1, mockUpdateData);
-      expect(mockStatus).toHaveBeenCalledWith(200);
+        it('should handle partial update with only status field', async () => {
+            // Arrange
+            const updateData = { status: 'Open' };
+            const updatedPosition = { id: 1, title: 'Existing Title', status: 'Open' };
+
+            mockRequest.params = { id: '1' };
+            mockRequest.body = updateData;
+
+            (updatePositionService as jest.Mock).mockResolvedValue(updatedPosition);
+
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
+
+            // Assert
+            expect(updatePositionService).toHaveBeenCalledWith(1, updateData);
+            expect(mockStatus).toHaveBeenCalledWith(200);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Position updated successfully',
+                data: updatedPosition
+            });
+        });
+
+        it('should handle update with all fields', async () => {
+            // Arrange
+            const updateData = {
+                title: 'Senior Developer',
+                description: 'New description',
+                location: 'Barcelona',
+                jobDescription: 'Detailed job description',
+                status: 'Open',
+                isVisible: true,
+                salaryMin: 60000,
+                salaryMax: 80000,
+                employmentType: 'Full-time',
+                companyId: 1,
+                interviewFlowId: 1
+            };
+            const updatedPosition = { id: 1, ...updateData };
+
+            mockRequest.params = { id: '1' };
+            mockRequest.body = updateData;
+
+            (updatePositionService as jest.Mock).mockResolvedValue(updatedPosition);
+
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
+
+            // Assert
+            expect(updatePositionService).toHaveBeenCalledWith(1, updateData);
+            expect(mockStatus).toHaveBeenCalledWith(200);
+        });
     });
 
-    it('should handle salary updates correctly', async () => {
-      const mockUpdateData = {
-        salaryMin: 50000,
-        salaryMax: 80000
-      };
+    describe('should_return_400_for_invalid_position_id', () => {
+        it('should return 400 when position ID is not a number', async () => {
+            // Arrange
+            mockRequest.params = { id: 'invalid' };
+            mockRequest.body = { title: 'New Title' };
 
-      const mockUpdatedPosition = {
-        id: 1,
-        salaryMin: 50000,
-        salaryMax: 80000
-      };
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
 
-      mockRequest = {
-        params: { id: '1' },
-        body: mockUpdateData
-      };
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(400);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Invalid position ID format',
+                error: 'Position ID must be a valid number'
+            });
+            expect(updatePositionService).not.toHaveBeenCalled();
+        });
 
-      (updatePositionService as jest.Mock).mockResolvedValue(mockUpdatedPosition);
+        it('should return 400 when position ID is NaN', async () => {
+            // Arrange
+            mockRequest.params = { id: 'abc123' };
+            mockRequest.body = { title: 'New Title' };
 
-      await updatePosition(mockRequest as Request, mockResponse as Response);
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
 
-      expect(updatePositionService).toHaveBeenCalledWith(1, mockUpdateData);
-      expect(mockStatus).toHaveBeenCalledWith(200);
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(400);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Invalid position ID format',
+                error: 'Position ID must be a valid number'
+            });
+        });
+
+        it('should accept negative position ID and let service handle it', async () => {
+            // Arrange
+            mockRequest.params = { id: '-1' };
+            mockRequest.body = { title: 'New Title' };
+
+            (updatePositionService as jest.Mock).mockResolvedValue({ id: -1, title: 'New Title' });
+
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
+
+            // Assert
+            expect(updatePositionService).toHaveBeenCalledWith(-1, { title: 'New Title' });
+        });
+
+        it('should accept zero position ID and let service handle it', async () => {
+            // Arrange
+            mockRequest.params = { id: '0' };
+            mockRequest.body = { title: 'New Title' };
+
+            (updatePositionService as jest.Mock).mockResolvedValue({ id: 0, title: 'New Title' });
+
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
+
+            // Assert
+            expect(updatePositionService).toHaveBeenCalledWith(0, { title: 'New Title' });
+        });
     });
 
-    it('should handle boolean isVisible field correctly', async () => {
-      const mockUpdateData = {
-        isVisible: true
-      };
+    describe('should_return_400_for_empty_request_body', () => {
+        it('should return 400 when request body is empty object', async () => {
+            // Arrange
+            mockRequest.params = { id: '1' };
+            mockRequest.body = {};
 
-      const mockUpdatedPosition = {
-        id: 1,
-        isVisible: true
-      };
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
 
-      mockRequest = {
-        params: { id: '1' },
-        body: mockUpdateData
-      };
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(400);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'No data provided for update',
+                error: 'Request body cannot be empty'
+            });
+            expect(updatePositionService).not.toHaveBeenCalled();
+        });
 
-      (updatePositionService as jest.Mock).mockResolvedValue(mockUpdatedPosition);
+        it('should return 400 when request body is null', async () => {
+            // Arrange
+            mockRequest.params = { id: '1' };
+            mockRequest.body = null;
 
-      await updatePosition(mockRequest as Request, mockResponse as Response);
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
 
-      expect(updatePositionService).toHaveBeenCalledWith(1, mockUpdateData);
-      expect(mockStatus).toHaveBeenCalledWith(200);
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(400);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'No data provided for update',
+                error: 'Request body cannot be empty'
+            });
+        });
+
+        it('should return 400 when request body is undefined', async () => {
+            // Arrange
+            mockRequest.params = { id: '1' };
+            mockRequest.body = undefined;
+
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
+
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(400);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'No data provided for update',
+                error: 'Request body cannot be empty'
+            });
+        });
     });
 
-    it('should handle applicationDeadline updates correctly', async () => {
-      const mockUpdateData = {
-        applicationDeadline: '2024-12-31T23:59:59Z'
-      };
+    describe('should_return_404_when_position_not_found', () => {
+        it('should return 404 when position does not exist', async () => {
+            // Arrange
+            mockRequest.params = { id: '999' };
+            mockRequest.body = { title: 'New Title' };
 
-      const mockUpdatedPosition = {
-        id: 1,
-        applicationDeadline: '2024-12-31T23:59:59Z'
-      };
+            (updatePositionService as jest.Mock).mockRejectedValue(
+                new Error('Position not found')
+            );
 
-      mockRequest = {
-        params: { id: '1' },
-        body: mockUpdateData
-      };
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
 
-      (updatePositionService as jest.Mock).mockResolvedValue(mockUpdatedPosition);
-
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(updatePositionService).toHaveBeenCalledWith(1, mockUpdateData);
-      expect(mockStatus).toHaveBeenCalledWith(200);
-    });
-  });
-
-  describe('Validation error cases', () => {
-    it('should return 400 for invalid position ID format', async () => {
-      mockRequest = {
-        params: { id: 'invalid' },
-        body: { title: 'Test Title' }
-      };
-
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'Invalid position ID format',
-        error: 'Position ID must be a valid number'
-      });
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(404);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Position not found',
+                error: 'Position not found'
+            });
+        });
     });
 
-    it('should return 400 when no data provided for update', async () => {
-      mockRequest = {
-        params: { id: '1' },
-        body: {}
-      };
+    describe('should_return_400_for_validation_errors', () => {
+        it('should return 400 when title is empty', async () => {
+            // Arrange
+            mockRequest.params = { id: '1' };
+            mockRequest.body = { title: '' };
 
-      await updatePosition(mockRequest as Request, mockResponse as Response);
+            (updatePositionService as jest.Mock).mockRejectedValue(
+                new Error('Title is required and must be a valid string')
+            );
 
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'No data provided for update',
-        error: 'Request body cannot be empty'
-      });
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
+
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(400);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Validation error',
+                error: 'Title is required and must be a valid string'
+            });
+        });
+
+        it('should return 400 when status is invalid', async () => {
+            // Arrange
+            mockRequest.params = { id: '1' };
+            mockRequest.body = { status: 'InvalidStatus' };
+
+            (updatePositionService as jest.Mock).mockRejectedValue(
+                new Error('Invalid status. Must be one of: Open, Contratado, Cerrado, Borrador')
+            );
+
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
+
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(400);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Validation error',
+                error: 'Invalid status. Must be one of: Open, Contratado, Cerrado, Borrador'
+            });
+        });
+
+        it('should return 400 when salaryMin > salaryMax', async () => {
+            // Arrange
+            mockRequest.params = { id: '1' };
+            mockRequest.body = { salaryMin: 80000, salaryMax: 60000 };
+
+            (updatePositionService as jest.Mock).mockRejectedValue(
+                new Error('Minimum salary cannot be greater than maximum salary')
+            );
+
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
+
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(400);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Validation error',
+                error: 'Minimum salary cannot be greater than maximum salary'
+            });
+        });
+
+        it('should return 400 when applicationDeadline is in the past', async () => {
+            // Arrange
+            mockRequest.params = { id: '1' };
+            mockRequest.body = { applicationDeadline: '2020-01-01' };
+
+            (updatePositionService as jest.Mock).mockRejectedValue(
+                new Error('Application deadline cannot be in the past')
+            );
+
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
+
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(400);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Validation error',
+                error: 'Application deadline cannot be in the past'
+            });
+        });
     });
 
-    it('should return 400 when request body is null', async () => {
-      mockRequest = {
-        params: { id: '1' },
-        body: null
-      };
+    describe('should_return_400_for_invalid_reference_data', () => {
+        it('should return 400 when companyId does not exist', async () => {
+            // Arrange
+            mockRequest.params = { id: '1' };
+            mockRequest.body = { companyId: 999 };
 
-      await updatePosition(mockRequest as Request, mockResponse as Response);
+            (updatePositionService as jest.Mock).mockRejectedValue(
+                new Error('Company not found')
+            );
 
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'No data provided for update',
-        error: 'Request body cannot be empty'
-      });
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
+
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(400);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Invalid reference data',
+                error: 'Company not found'
+            });
+        });
+
+        it('should return 400 when interviewFlowId does not exist', async () => {
+            // Arrange
+            mockRequest.params = { id: '1' };
+            mockRequest.body = { interviewFlowId: 999 };
+
+            (updatePositionService as jest.Mock).mockRejectedValue(
+                new Error('Interview flow not found')
+            );
+
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
+
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(400);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Invalid reference data',
+                error: 'Interview flow not found'
+            });
+        });
     });
 
-    it('should return 400 for validation errors from service', async () => {
-      const mockUpdateData = {
-        title: '' // Invalid empty title
-      };
+    describe('should_return_500_for_server_errors', () => {
+        it('should return 500 for unexpected errors', async () => {
+            // Arrange
+            mockRequest.params = { id: '1' };
+            mockRequest.body = { title: 'New Title' };
 
-      mockRequest = {
-        params: { id: '1' },
-        body: mockUpdateData
-      };
+            (updatePositionService as jest.Mock).mockRejectedValue(
+                new Error('Database connection failed')
+            );
 
-      const validationError = new Error('El título es obligatorio y debe ser una cadena válida');
-      (updatePositionService as jest.Mock).mockRejectedValue(validationError);
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
 
-      await updatePosition(mockRequest as Request, mockResponse as Response);
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(500);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Error updating position',
+                error: 'Database connection failed'
+            });
+        });
 
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'Validation error',
-        error: 'El título es obligatorio y debe ser una cadena válida'
-      });
+        it('should return 500 for non-Error exceptions', async () => {
+            // Arrange
+            mockRequest.params = { id: '1' };
+            mockRequest.body = { title: 'New Title' };
+
+            (updatePositionService as jest.Mock).mockRejectedValue('String error');
+
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
+
+            // Assert
+            expect(mockStatus).toHaveBeenCalledWith(500);
+            expect(mockJson).toHaveBeenCalledWith({
+                message: 'Error updating position',
+                error: 'An unexpected error occurred'
+            });
+        });
     });
 
-    it('should return 400 for invalid status validation', async () => {
-      const mockUpdateData = {
-        status: 'InvalidStatus'
-      };
+    describe('should_handle_large_position_ids', () => {
+        it('should handle very large position IDs', async () => {
+            // Arrange
+            const largeId = 2147483647; // Max 32-bit integer
+            mockRequest.params = { id: largeId.toString() };
+            mockRequest.body = { title: 'New Title' };
 
-      mockRequest = {
-        params: { id: '1' },
-        body: mockUpdateData
-      };
+            (updatePositionService as jest.Mock).mockResolvedValue({
+                id: largeId,
+                title: 'New Title'
+            });
 
-      const validationError = new Error('Estado inválido. Debe ser uno de: Open, Contratado, Cerrado, Borrador');
-      (updatePositionService as jest.Mock).mockRejectedValue(validationError);
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
 
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'Validation error',
-        error: 'Estado inválido. Debe ser uno de: Open, Contratado, Cerrado, Borrador'
-      });
+            // Assert
+            expect(updatePositionService).toHaveBeenCalledWith(largeId, { title: 'New Title' });
+            expect(mockStatus).toHaveBeenCalledWith(200);
+        });
     });
 
-    it('should return 400 for salary range validation error', async () => {
-      const mockUpdateData = {
-        salaryMin: 80000,
-        salaryMax: 50000
-      };
+    describe('should_handle_complex_update_data', () => {
+        it('should handle update with multiple fields including optional ones', async () => {
+            // Arrange
+            const complexUpdateData = {
+                title: 'Senior Software Engineer',
+                description: 'Updated description',
+                status: 'Open',
+                isVisible: true,
+                salaryMin: 60000,
+                salaryMax: 80000,
+                requirements: 'Updated requirements',
+                responsibilities: 'Updated responsibilities',
+                benefits: 'Updated benefits'
+            };
 
-      mockRequest = {
-        params: { id: '1' },
-        body: mockUpdateData
-      };
+            mockRequest.params = { id: '1' };
+            mockRequest.body = complexUpdateData;
 
-      const validationError = new Error('El salario mínimo no puede ser mayor que el máximo');
-      (updatePositionService as jest.Mock).mockRejectedValue(validationError);
+            (updatePositionService as jest.Mock).mockResolvedValue({
+                id: 1,
+                ...complexUpdateData
+            });
 
-      await updatePosition(mockRequest as Request, mockResponse as Response);
+            // Act
+            await updatePosition(mockRequest as Request, mockResponse as Response);
 
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'Validation error',
-        error: 'El salario mínimo no puede ser mayor que el máximo'
-      });
+            // Assert
+            expect(updatePositionService).toHaveBeenCalledWith(1, complexUpdateData);
+            expect(mockStatus).toHaveBeenCalledWith(200);
+        });
     });
-  });
+});
 
-  describe('Not found error cases', () => {
-    it('should return 404 when position not found', async () => {
-      const mockUpdateData = {
-        title: 'Updated Title'
-      };
-
-      mockRequest = {
-        params: { id: '999' },
-        body: mockUpdateData
-      };
-
-      const notFoundError = new Error('Position not found');
-      (updatePositionService as jest.Mock).mockRejectedValue(notFoundError);
-
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(404);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'Position not found',
-        error: 'Position not found'
-      });
-    });
-  });
-
-  describe('Reference validation error cases', () => {
-    it('should return 400 when company not found', async () => {
-      const mockUpdateData = {
-        companyId: 999
-      };
-
-      mockRequest = {
-        params: { id: '1' },
-        body: mockUpdateData
-      };
-
-      const referenceError = new Error('Company not found');
-      (updatePositionService as jest.Mock).mockRejectedValue(referenceError);
-
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'Invalid reference data',
-        error: 'Company not found'
-      });
-    });
-
-    it('should return 400 when interview flow not found', async () => {
-      const mockUpdateData = {
-        interviewFlowId: 999
-      };
-
-      mockRequest = {
-        params: { id: '1' },
-        body: mockUpdateData
-      };
-
-      const referenceError = new Error('Interview flow not found');
-      (updatePositionService as jest.Mock).mockRejectedValue(referenceError);
-
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'Invalid reference data',
-        error: 'Interview flow not found'
-      });
-    });
-  });
-
-  describe('Server error cases', () => {
-    it('should return 500 for unexpected errors', async () => {
-      const mockUpdateData = {
-        title: 'Updated Title'
-      };
-
-      mockRequest = {
-        params: { id: '1' },
-        body: mockUpdateData
-      };
-
-      const serverError = new Error('Database connection failed');
-      (updatePositionService as jest.Mock).mockRejectedValue(serverError);
-
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(500);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'Error updating position',
-        error: 'Database connection failed'
-      });
-    });
-
-    it('should handle non-Error exceptions', async () => {
-      const mockUpdateData = {
-        title: 'Updated Title'
-      };
-
-      mockRequest = {
-        params: { id: '1' },
-        body: mockUpdateData
-      };
-
-      (updatePositionService as jest.Mock).mockRejectedValue('Unknown error');
-
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(500);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'Error updating position',
-        error: 'Unknown error occurred'
-      });
-    });
-  });
-
-  describe('Edge cases', () => {
-    it('should handle negative position ID', async () => {
-      mockRequest = {
-        params: { id: '-1' },
-        body: { title: 'Test Title' }
-      };
-
-      const mockUpdatedPosition = { id: -1 };
-      (updatePositionService as jest.Mock).mockResolvedValue(mockUpdatedPosition);
-
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(updatePositionService).toHaveBeenCalledWith(-1, { title: 'Test Title' });
-      expect(mockStatus).toHaveBeenCalledWith(200);
-    });
-
-    it('should handle zero position ID', async () => {
-      mockRequest = {
-        params: { id: '0' },
-        body: { title: 'Test Title' }
-      };
-
-      const mockUpdatedPosition = { id: 0 };
-      (updatePositionService as jest.Mock).mockResolvedValue(mockUpdatedPosition);
-
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(updatePositionService).toHaveBeenCalledWith(0, { title: 'Test Title' });
-      expect(mockStatus).toHaveBeenCalledWith(200);
-    });
-
-    it('should handle large position ID', async () => {
-      const largeId = '999999999';
-      mockRequest = {
-        params: { id: largeId },
-        body: { title: 'Test Title' }
-      };
-
-      const mockUpdatedPosition = { id: 999999999 };
-      (updatePositionService as jest.Mock).mockResolvedValue(mockUpdatedPosition);
-
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(updatePositionService).toHaveBeenCalledWith(999999999, { title: 'Test Title' });
-      expect(mockStatus).toHaveBeenCalledWith(200);
-    });
-
-    it('should handle complex update data', async () => {
-      const complexUpdateData = {
-        title: 'Senior Full-Stack Developer',
-        description: 'Comprehensive role description',
-        status: 'Open',
-        isVisible: true,
-        location: 'Madrid, Spain',
-        jobDescription: 'Detailed job requirements and expectations',
-        requirements: 'Experience with React, Node.js, PostgreSQL',
-        responsibilities: 'Lead development team, mentor junior developers',
-        salaryMin: 60000,
-        salaryMax: 90000,
-        employmentType: 'Full-time',
-        benefits: 'Health insurance, remote work, flexible hours',
-        companyDescription: 'Leading tech company in Spain',
-        applicationDeadline: '2024-12-31T23:59:59Z',
-        contactInfo: 'hr@company.com',
-        companyId: 1,
-        interviewFlowId: 1
-      };
-
-      mockRequest = {
-        params: { id: '1' },
-        body: complexUpdateData
-      };
-
-      const mockUpdatedPosition = { id: 1, ...complexUpdateData };
-      (updatePositionService as jest.Mock).mockResolvedValue(mockUpdatedPosition);
-
-      await updatePosition(mockRequest as Request, mockResponse as Response);
-
-      expect(updatePositionService).toHaveBeenCalledWith(1, complexUpdateData);
-      expect(mockStatus).toHaveBeenCalledWith(200);
-      expect(mockJson).toHaveBeenCalledWith({
-        message: 'Position updated successfully',
-        data: mockUpdatedPosition
-      });
-    });
-  });
-}); 

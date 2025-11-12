@@ -113,57 +113,46 @@ export const getCandidateNamesByPositionService = async (positionId: number) => 
     }
 };
 
-/**
- * Actualiza una posición existente
- * @param positionId - ID de la posición a actualizar
- * @param updateData - Datos a actualizar
- * @returns Posición actualizada
- */
-export const updatePositionService = async (positionId: number, updateData: any) => {
-    try {
-        // Validar que la posición existe
-        const existingPosition = await Position.findOne(positionId);
-        if (!existingPosition) {
-            throw new Error('Position not found');
-        }
-
-        // Validar los datos de entrada
-        validatePositionUpdate(updateData);
-
-        // Verificar que companyId e interviewFlowId existen si se están actualizando
-        if (updateData.companyId) {
-            const company = await prisma.company.findUnique({
-                where: { id: updateData.companyId }
-            });
-            if (!company) {
-                throw new Error('Company not found');
-            }
-        }
-
-        if (updateData.interviewFlowId) {
-            const interviewFlow = await prisma.interviewFlow.findUnique({
-                where: { id: updateData.interviewFlowId }
-            });
-            if (!interviewFlow) {
-                throw new Error('Interview flow not found');
-            }
-        }
-
-        // Actualizar la posición usando el modelo de dominio
-        const updatedPosition = new Position({
-            ...existingPosition,
-            ...updateData,
-            id: positionId
-        });
-
-        const result = await updatedPosition.save();
-        
-        return result;
-    } catch (error) {
-        console.error('Error updating position:', error);
-        if (error instanceof Error) {
-            throw error;
-        }
-        throw new Error('Error updating position');
+export const updatePositionService = async (positionId: number, updateData: any): Promise<any> => {
+    // Verify position exists
+    const existingPosition = await Position.findOne(positionId);
+    if (!existingPosition) {
+        throw new Error('Position not found');
     }
+
+    // Validate update data
+    validatePositionUpdate(updateData);
+
+    // Validate company reference if provided
+    if (updateData.companyId !== undefined) {
+        const company = await prisma.company.findUnique({
+            where: { id: updateData.companyId }
+        });
+        if (!company) {
+            throw new Error('Company not found');
+        }
+    }
+
+    // Validate interview flow reference if provided
+    if (updateData.interviewFlowId !== undefined) {
+        const interviewFlow = await prisma.interviewFlow.findUnique({
+            where: { id: updateData.interviewFlowId }
+        });
+        if (!interviewFlow) {
+            throw new Error('Interview flow not found');
+        }
+    }
+
+    // Merge existing data with updates
+    const mergedData = {
+        ...existingPosition,
+        ...updateData,
+        id: positionId // Ensure ID is preserved
+    };
+
+    // Create Position instance and save
+    const position = new Position(mergedData);
+    const updatedPosition = await position.save();
+
+    return updatedPosition;
 };

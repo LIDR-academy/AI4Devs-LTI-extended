@@ -25,7 +25,11 @@ Output is in markdown format, and properly formatted and indented. Follow exactl
 
 # Generate data model
 
-Eres un experto en bases de datos. Dame una documentacion del modelo de datos que explique campos, relaciones y un diagrama en formato mermaid @/prisma 
+# Rol 
+Eres un experto en bases de datos. 
+
+# Objetivo
+Dame una documentacion del modelo de datos que explique campos, relaciones y un diagrama en formato mermaid @prisma 
 
 ---
 # Prompt para enriquecer historias de usuario
