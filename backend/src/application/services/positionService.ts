@@ -1,5 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { Position } from '../../domain/models/Position';
+import { Company } from '../../domain/models/Company';
+import { InterviewFlow } from '../../domain/models/InterviewFlow';
+import { validatePositionUpdate } from '../validator';
 
 const prisma = new PrismaClient();
 
@@ -110,4 +113,41 @@ export const getCandidateNamesByPositionService = async (positionId: number) => 
         console.error('Error retrieving candidate names by position:', error);
         throw new Error('Error retrieving candidate names by position');
     }
+};
+
+export const updatePositionService = async (positionId: number, updateData: any): Promise<any> => {
+    // Validate position exists
+    const position = await Position.findOne(positionId);
+    if (!position) {
+        throw new Error('Position not found');
+    }
+
+    // Validate input data
+    validatePositionUpdate(updateData);
+
+    // Validate companyId exists if provided
+    if (updateData.companyId !== undefined) {
+        const company = await Company.findOne(updateData.companyId);
+        if (!company) {
+            throw new Error('Invalid reference data');
+        }
+    }
+
+    // Validate interviewFlowId exists if provided
+    if (updateData.interviewFlowId !== undefined) {
+        const interviewFlow = await InterviewFlow.findOne(updateData.interviewFlowId);
+        if (!interviewFlow) {
+            throw new Error('Invalid reference data');
+        }
+    }
+
+    // Update only provided fields (partial update)
+    Object.keys(updateData).forEach(key => {
+        if (updateData[key] !== undefined) {
+            (position as any)[key] = updateData[key];
+        }
+    });
+
+    // Save and return updated position
+    return await position.save();
 };
