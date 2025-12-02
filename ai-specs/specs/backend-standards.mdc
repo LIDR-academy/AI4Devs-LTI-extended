@@ -625,9 +625,8 @@ export class Candidate {
 
 ## Coding Standards
 
-### Language and Naming Conventions
+### Naming Conventions
 
-- **English Only**: All code, comments, variable names, function names, class names, error messages, log messages, and documentation must be written in English
 - **Variable Naming**: Use camelCase for variables and functions (e.g., `candidateId`, `findCandidateById`)
 - **Class Naming**: Use PascalCase for classes and interfaces (e.g., `Candidate`, `CandidateRepository`)
 - **Constants Naming**: Use UPPER_SNAKE_CASE for constants (e.g., `MAX_CANDIDATES_PER_PAGE`)
@@ -884,12 +883,34 @@ export class CandidateRepository implements ICandidateRepository {
 
 ## Testing Standards
 
-### Unit Testing
+The project has strict requirements for code quality and maintainability. These are the unit testing standards and best practices that must be applied. 
 
-- **Service Layer Testing**: Test business logic in services
-- **Mock Dependencies**: Mock all external dependencies (repositories, database)
-- **Test Coverage**: Maintain 90% coverage threshold
+### Test File Structure
+- Use descriptive test file names: `[componentName].test.ts`
+- Place test files alongside the source code they test
+- Use Jest as the testing framework with TypeScript support
+- Maintain 90% coverage threshold for branches, functions, lines, and statements
 
+
+### Test Organization Pattern
+Template:
+```typescript
+describe('[ComponentName] - [methodName]', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('should_[expected_behavior]_when_[condition]', () => {
+    it('should [specific test case]', async () => {
+      // Arrange
+      // Act  
+      // Assert
+    });
+  });
+});
+```
+
+Real example:
 ```typescript
 describe('CandidateService - findById', () => {
     beforeEach(() => {
@@ -912,23 +933,149 @@ describe('CandidateService - findById', () => {
 });
 ```
 
+
+
+### Test Case Naming Convention
+- Use descriptive, behavior-driven naming: `should_[expected_behavior]_when_[condition]`
+- Group related test cases under descriptive `describe` blocks
+- Use snake_case for describe blocks and camelCase for individual tests
+
+### Test Structure (AAA Pattern)
+Always follow the Arrange-Act-Assert pattern:
+```typescript
+it('should update candidate stage successfully when valid data provided', async () => {
+  // Arrange - Set up test data and mocks
+  const candidateId = 1;
+  const applicationId = 1;
+  const newInterviewStep = 2;
+  
+  // Act - Execute the function under test
+  const result = await updateCandidateStage(candidateId, applicationId, newInterviewStep);
+  
+  // Assert - Verify the expected behavior
+  expect(result).toEqual(expectedResult);
+});
+```
+
+Assertion pattern:
+- Use specific matchers: `toHaveBeenCalledWith()`, `toHaveBeenCalledTimes()`
+- Verify both successful operations and error conditions
+- Check that mocks were called with correct parameters
+- Assert on return values and side effects
+
+
+
+
+
+
+
+
+### Mocking Standards
+
+- Mock all external dependencies (models, services, database clients)
+- Mock repository layers in service tests
+- Mock service layers in controller tests
+- Use `jest.mock()` at the top of test files for module-level mocking
+- Create mock instances with realistic data structures
+- Clear all mocks in `beforeEach()` to ensure test isolation
+
+
+### Test Coverage Requirements
+
+- **Comprehensive test coverage**: Include these test categories for each function:
+1. **Happy Path Tests**: Valid inputs producing expected outputs
+2. **Error Handling Tests**: Invalid inputs, missing data, database errors
+3. **Edge Cases**: Boundary values, null/undefined inputs, empty data
+4. **Validation Tests**: Input validation, business rule enforcement
+5. **Integration Points**: External service calls, database operations
+
+- **Threshold**: 90% for branches, functions, lines, and statements
+- **Coverage Reports**: Generate coverage reports with `npm run test:coverage`
+- **Coverage Files**: Coverage reports in `coverage/` directory adding the date, like YYYYMMDD-backend-coverage.md
+
+
+### Error Testing
+- Test both expected errors and unexpected errors
+- Verify error messages are descriptive and helpful
+- Test error propagation through service layers
+- Ensure proper HTTP status codes in controller tests
+
+### Controller Testing Specifics
+- Mock the service layer completely
+- Test HTTP request/response handling
+- Verify parameter parsing and validation
+- Test error response formatting
+- Use realistic Express Request/Response mocks
+
+### Service Testing Specifics
+- Mock domain models and repositories
+- Test business logic in isolation
+- Verify data transformation and validation
+- Test error handling and edge cases
+- Mock external dependencies (Prisma, validators)
+
+### Database Testing
+- Mock Prisma client and all database operations
+- Test both successful and failed database operations
+- Verify correct database queries and parameters
+- Test transaction handling and rollback scenarios
+
+### Async Testing
+- Always use `async/await` for asynchronous operations
+- Use `Promise.allSettled()` for testing concurrent operations
+- Properly handle promise rejections in tests
+- Test timeout scenarios where applicable
+
+### Test Data Management
+- Use factory functions for creating test data
+- Keep test data consistent and realistic
+- Avoid hardcoded values in multiple places
+- Use meaningful test data that reflects real-world scenarios
+
 ### Integration Testing
 
 - **Controller Testing**: Test HTTP request/response handling
 - **Database Testing**: Test repository implementations with database
 - **End-to-End Flow**: Test complete request flows
 
-### Test Coverage Requirements
 
-- **Threshold**: 90% for branches, functions, lines, and statements
-- **Coverage Reports**: Generate coverage reports with `npm run test:coverage`
-- **Coverage Files**: Coverage reports in `coverage/` directory
+### Code Quality Standards
 
-### Mocking Standards
+#### TypeScript Usage
+- Use strict typing for all test parameters and return values
+- Define proper interfaces for mock data
+- Use type assertions sparingly and with proper justification
+- Leverage TypeScript's type system for better test reliability
 
-- **Mock Repositories**: Mock repository layers in service tests
-- **Mock Services**: Mock service layers in controller tests
-- **Realistic Mocks**: Use realistic mock data that reflects actual domain models
+#### Documentation
+- Write clear, descriptive test names that explain the scenario
+- Add comments for complex test setups
+- Document any special test conditions or edge cases
+- Keep test code as readable as production code
+
+#### Performance Considerations
+- Keep tests fast and focused
+- Avoid unnecessary async operations in tests
+- Use appropriate mock strategies to avoid real I/O
+- Group related tests to minimize setup/teardown overhead
+
+### Integration with Development Workflow
+- Run tests before every commit
+- Ensure all tests pass before merging
+- Use test-driven development when appropriate
+- Update tests when modifying existing functionality
+
+### Common Anti-Patterns to Avoid
+- Don't test implementation details, test behavior
+- Don't create overly complex test setups
+- Don't ignore failing tests or skip error scenarios
+- Don't use real database connections in unit tests
+- Don't create tests that depend on external services
+- Don't write tests that are too tightly coupled to implementation
+
+### Example Test Structure
+
+
 
 ## Performance Best Practices
 

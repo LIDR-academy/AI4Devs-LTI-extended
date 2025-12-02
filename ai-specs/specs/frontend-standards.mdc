@@ -102,9 +102,8 @@ frontend/
 
 ## Coding Standards
 
-### Language and Naming Conventions
+### Naming Conventions
 
-- **English Only**: All code, comments, variable names, function names, component names, prop names, error messages, console logs, and documentation must be written in English
 - **Component Naming**: Use PascalCase for React components (e.g., `CandidateCard`, `PositionDetails`, `RecruiterDashboard`)
 - **Variable Naming**: Use camelCase for variables and functions (e.g., `candidateId`, `handleSubmit`, `fetchPositions`)
 - **Constants Naming**: Use UPPER_SNAKE_CASE for constants (e.g., `MAX_CANDIDATES_PER_PAGE`, `API_BASE_URL`)
