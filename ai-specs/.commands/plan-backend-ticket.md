@@ -14,14 +14,14 @@ Obtain a step-by-step plan for a Jira ticket that is ready to start implementing
 
 1. Adopt the role of `.claude/agents/backend-developer.md`
 1. Analyze the Jira ticket mentioned in #ticket using the MCP. If the mention is a local file, then avoid using MCP
-2. Propose a step-by-step plan for the backend part, taking into account everything mentioned in the ticket and applying the project’s best practices and rules you can find in  `/openspec/specs`. 
+2. Propose a step-by-step plan for the backend part, taking into account everything mentioned in the ticket and applying the project’s best practices and rules you can find in  `/ai-specs/specs`. 
 3. Apply the best practices of your role to ensure the developer can be fully autonomous and implement the ticket end-to-end using only your plan. 
 4. Do not write code yet; provide only the plan in the output format defined below.
 5. If you are asked to start implementing at some point, make sure the first thing you do is to move to a branch named after the ticket id (if you are not yet there) and follow the process described in the command /develop-us.md
 
 # Output format
 
-Markdown document at the path `openspec/changes/[jira_id]_backend.md` containing the complete implementation details.
+Markdown document at the path `ai-specs/changes/[jira_id]_backend.md` containing the complete implementation details.
 Follow this template:
 
 ## Backend Implementation Plan Ticket Template Structure
@@ -47,7 +47,7 @@ Detailed steps, typically:
   2. Pull latest changes: `git pull origin [base-branch]`
   3. Create new branch: `git checkout -b [branch-name]`
   4. Verify branch creation: `git branch`
-- **Notes**: This must be the FIRST step before any code changes. Refer to `openspec/specs/backend-standards.mdc` section "Development Workflow" for specific branch naming conventions and workflow rules.
+- **Notes**: This must be the FIRST step before any code changes. Refer to `ai-specs/specs/backend-standards.mdc` section "Development Workflow" for specific branch naming conventions and workflow rules.
 
 #### **Step N: [Action Name]**
 - **File**: Target file path
@@ -77,8 +77,8 @@ Example of a good structure:
 - **Implementation Steps**:
   1. **Review Changes**: Analyze all code changes made during implementation
   2. **Identify Documentation Files**: Determine which documentation files need updates based on:
-     - Data model changes → Update `openspec/specs/data-model.md`
-     - API endpoint changes → Update `openspec/specs/api-spec.yml`
+     - Data model changes → Update `ai-specs/specs/data-model.md`
+     - API endpoint changes → Update `ai-specs/specs/api-spec.yml`
      - Standards/libraries/config changes → Update relevant `*-standards.mdc` files
      - Architecture changes → Update relevant architecture documentation
   3. **Update Documentation**: For each affected file:
@@ -90,7 +90,7 @@ Example of a good structure:
      - Check that documentation follows established structure
   5. **Report Updates**: Document which files were updated and what changes were made
 - **References**: 
-  - Follow process described in `openspec/specs/documentation-standards.mdc`
+  - Follow process described in `ai-specs/specs/documentation-standards.mdc`
   - All documentation must be written in English
 - **Notes**: This step is MANDATORY before considering the implementation complete. Do not skip documentation updates.
 
