@@ -1,0 +1,17 @@
+feat(update-position): add update position (PATCH and edit form) (SCRUM-10)
+
+Enable recruiters to update existing position details via PATCH API and
+frontend edit form.
+
+Backend:
+- PATCH /positions/:id with partial updates; validatePositionUpdateData;
+  updatePosition in positionService; updatePosition controller; route and
+  unit tests.
+
+Frontend:
+- Edit button on position cards; EditPositionForm component; route
+  /positions/:id/edit; updatePosition in positionService; App routing.
+
+OpenSpec:
+- Change artifacts: proposal, design, tasks, spec, update-position_backend,
+  improved-user-story.

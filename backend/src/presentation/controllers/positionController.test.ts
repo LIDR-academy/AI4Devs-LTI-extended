@@ -1,8 +1,10 @@
-import { getCandidatesByPosition } from './positionController';
+import { getCandidatesByPosition, updatePosition } from './positionController';
 import { Request, Response } from 'express';
-import { getCandidatesByPositionService } from '../../application/services/positionService';
+import { getCandidatesByPositionService, updatePositionService } from '../../application/services/positionService';
+import { validatePositionUpdateData } from '../../application/validator';
 
 jest.mock('../../application/services/positionService');
+jest.mock('../../application/validator');
 
 describe('getCandidatesByPosition', () => {
   let mockRequest: Partial<Request>;
@@ -289,6 +291,88 @@ describe('getCandidatesByPosition', () => {
       await getCandidatesByPosition(mockRequest as Request, mockResponse as Response);
 
       expect(mockJson).toHaveBeenCalledWith(serviceResult);
+    });
+  });
+});
+
+describe('updatePosition', () => {
+  let mockRequest: Partial<Request>;
+  let mockResponse: Partial<Response>;
+  let mockStatus: jest.Mock;
+  let mockJson: jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockStatus = jest.fn().mockReturnThis();
+    mockJson = jest.fn();
+    mockResponse = { status: mockStatus, json: mockJson };
+  });
+
+  it('should return 200 and updated position on successful update', async () => {
+    const updatedPosition = { id: 1, title: 'Updated Title', description: 'Desc', status: 'Open' };
+    mockRequest = { params: { id: '1' }, body: { title: 'Updated Title' } };
+    (validatePositionUpdateData as jest.Mock).mockImplementation(() => {});
+    (updatePositionService as jest.Mock).mockResolvedValue(updatedPosition);
+
+    await updatePosition(mockRequest as Request, mockResponse as Response);
+
+    expect(validatePositionUpdateData).toHaveBeenCalledWith({ title: 'Updated Title' });
+    expect(updatePositionService).toHaveBeenCalledWith(1, { title: 'Updated Title' });
+    expect(mockStatus).toHaveBeenCalledWith(200);
+    expect(mockJson).toHaveBeenCalledWith(updatedPosition);
+  });
+
+  it('should return 400 when position ID is invalid', async () => {
+    mockRequest = { params: { id: 'invalid' }, body: { title: 'Test' } };
+
+    await updatePosition(mockRequest as Request, mockResponse as Response);
+
+    expect(mockStatus).toHaveBeenCalledWith(400);
+    expect(mockJson).toHaveBeenCalledWith({
+      message: 'Invalid position ID format',
+      error: 'Position ID must be a valid number',
+    });
+    expect(updatePositionService).not.toHaveBeenCalled();
+  });
+
+  it('should return 400 when validation fails', async () => {
+    mockRequest = { params: { id: '1' }, body: { title: '' } };
+    (validatePositionUpdateData as jest.Mock).mockImplementation(() => {
+      throw new Error('Invalid title');
+    });
+
+    await updatePosition(mockRequest as Request, mockResponse as Response);
+
+    expect(mockStatus).toHaveBeenCalledWith(400);
+    expect(mockJson).toHaveBeenCalledWith({ message: 'Validation error', error: 'Invalid title' });
+    expect(updatePositionService).not.toHaveBeenCalled();
+  });
+
+  it('should return 404 when position is not found', async () => {
+    mockRequest = { params: { id: '99999' }, body: { title: 'Test' } };
+    (validatePositionUpdateData as jest.Mock).mockImplementation(() => {});
+    (updatePositionService as jest.Mock).mockRejectedValue(new Error('Position not found'));
+
+    await updatePosition(mockRequest as Request, mockResponse as Response);
+
+    expect(mockStatus).toHaveBeenCalledWith(404);
+    expect(mockJson).toHaveBeenCalledWith({
+      message: 'Position not found',
+      error: 'Position not found',
+    });
+  });
+
+  it('should return 500 on server error', async () => {
+    mockRequest = { params: { id: '1' }, body: { title: 'Test' } };
+    (validatePositionUpdateData as jest.Mock).mockImplementation(() => {});
+    (updatePositionService as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+    await updatePosition(mockRequest as Request, mockResponse as Response);
+
+    expect(mockStatus).toHaveBeenCalledWith(500);
+    expect(mockJson).toHaveBeenCalledWith({
+      message: 'Error updating position',
+      error: 'Database error',
     });
   });
 });
