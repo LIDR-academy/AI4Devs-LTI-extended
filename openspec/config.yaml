@@ -3,18 +3,86 @@ schema: spec-driven
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Tech stack: TypeScript, Node.js, Express, Prisma, Domain-Driven Design (DDD)
+  Architecture: Clean Architecture with Domain, Application, and Presentation layers
+  We use conventional commits
+  Domain: LTI (Leadership. Technology. Impact) ATS platform
+  All code, comments, documentation, and technical artifacts must be in English
+
+  Project specs (single source of truth): All artifact creation and implementation MUST follow the project's technical context in ai-specs/. Read and apply these when creating or implementing:
+  - ai-specs/specs/base-standards.mdc — core principles, TDD, language standards, links to backend/frontend/docs standards
+  - ai-specs/specs/backend-standards.mdc — API, database, testing, security (backend changes)
+  - ai-specs/specs/frontend-standards.mdc — React, UI/UX (frontend changes)
+  - ai-specs/specs/api-spec.yml — API contracts and endpoint definitions
+  - ai-specs/specs/data-model.md — domain and data model
+  - ai-specs/specs/documentation-standards.mdc — docs structure and maintenance
+  For implementation: adopt the relevant agent from ai-specs/.agents/ (e.g. backend-developer.md for backend, frontend-developer.md for frontend). Use ai-specs/.commands/ (e.g. develop-backend.md, develop-frontend.md) for workflow guidance when applicable.
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  # Global: apply ai-specs when creating any artifact
+  _global:
+    - Before creating any artifact, read and apply ai-specs/specs/base-standards.mdc
+    - For backend-related artifacts, read ai-specs/specs/backend-standards.mdc and adopt guidelines from ai-specs/.agents/backend-developer.md
+    - For frontend-related artifacts, read ai-specs/specs/frontend-standards.mdc and adopt guidelines from ai-specs/.agents/frontend-developer.md
+    - Use ai-specs/specs/api-spec.yml and ai-specs/specs/data-model.md for API and data consistency in specs and tasks
+
+  # Rules for backend-related changes
+  tasks:
+    - Break tasks into chunks of max 2 hours
+    - For backend changes, follow the backend implementation plan structure
+    - All backend tasks must include mandatory steps: Create Feature Branch, Review/Update Tests, Run Tests, Manual Testing, Documentation Update
+  
+  # Rules for backend implementation plans and specs
+  spec:
+    - When creating backend implementation plans or specs, follow the Backend Implementation Plan Template Structure
+    - All backend plans must include these MANDATORY sections: |
+      1. Header with ticket ID and feature name
+      2. Overview with DDD and clean architecture principles
+      3. Architecture Context (Domain, Application, Presentation layers)
+      4. Implementation Steps (must start with Step 0: Create Feature Branch)
+      5. Implementation Order (numbered list)
+      6. Testing Checklist with mandatory validations
+      7. Error Response Format
+      8. Dependencies
+      9. Notes
+      10. Next Steps After Implementation
+      11. Implementation Verification
+  
+  # Backend-specific implementation rules
+  backend:
+    - Adopt the role of backend-developer when working on backend changes
+    - Apply Domain-Driven Design (DDD) principles
+    - Follow clean architecture with Domain, Application, and Presentation layers
+    - All implementation must follow TDD (Test-Driven Development)
+    - Branch naming: `feature/[ticket-id]-backend` (required, separate from general task branches)
+    - MANDATORY Steps (must be included in all backend implementation plans):
+      - Step 0: Create Feature Branch (must be FIRST step)
+      - Step N: Review and Update Existing Unit Tests (MANDATORY)
+      - Step N+1: Run Unit Tests and Verify Database State (MANDATORY)
+      - Step N+2: Manual Endpoint Testing with curl (MANDATORY)
+      - Step N+3: Update Technical Documentation (MANDATORY)
+    - Common implementation steps:
+      - Step 1: Create Validation Function
+      - Step 2: Create Service Method
+      - Step 3: Create Controller Method
+      - Step 4: Add Route
+      - Step 5: Write Unit Tests (with subcategories: Successful Cases, Validation Errors, Not Found, Reference Validation, Server Errors, Edge Cases)
+    - Testing requirements:
+      - All existing unit tests must be reviewed and updated if necessary
+      - All new unit tests must be created and passing
+      - Full test suite must execute with 0 failures
+      - Test report must be shown and verified
+      - Database state must be properly restored after all tests
+      - All new endpoints must be manually tested using curl
+      - All CREATE/UPDATE/DELETE operations must restore database to original state after testing
+      - Error cases must be tested manually (validation errors, 404, etc.)
+    - Documentation requirements:
+      - Data model changes → Update `openspec/specs/data-model.md`
+      - API endpoint changes → Update `openspec/specs/api-spec.yml`
+      - Standards/libraries/config changes → Update relevant `*-standards.mdc` files
+      - All documentation must be written in English
+    - Error response format must be defined with JSON structure and HTTP status code mapping
+    - Implementation verification checklist must include: Code Quality, Functionality, Testing, Integration, Documentation updates

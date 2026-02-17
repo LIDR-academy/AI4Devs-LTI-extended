@@ -66,11 +66,39 @@ Implement tasks from an OpenSpec change.
 
 6. **Implement tasks (loop until done or blocked)**
 
+   **CRITICAL**: Before implementing, read `.claude/rules/openspec-tasks-mandatory-steps.mdc` to understand mandatory testing requirements.
+
    For each pending task:
    - Show which task is being worked on
    - Make the code changes required
    - Keep changes minimal and focused
-   - Mark task complete in the tasks file: `- [ ]` → `- [x]`
+   
+   **For Manual Testing Tasks (MANDATORY - AGENT MUST EXECUTE)**:
+   - **Manual Endpoint Testing with curl**: If the task involves testing endpoints:
+     - Start backend server if needed
+     - Execute all curl commands yourself (GET, POST, PUT/PATCH, DELETE)
+     - Test error cases (validation errors, 404, etc.)
+     - Verify all responses
+     - Restore database state after CREATE/UPDATE/DELETE operations
+     - Document all curl commands and responses
+     - **NEVER ask the user to run curl commands** - you must execute them yourself
+   
+   - **E2E Testing with Playwright MCP**: If the task involves frontend/E2E testing:
+     - Start frontend and backend servers if needed
+     - Use Playwright MCP tools (`browser_navigate`, `browser_click`, `browser_type`, etc.)
+     - Execute complete user workflows
+     - Test error scenarios
+     - Verify data persistence
+     - Restore test environment and database state
+     - **NEVER ask the user to run E2E tests** - you must execute them yourself
+   
+   - **Mark task complete**: Only mark task as complete (`- [ ]` → `- [x]`) AFTER:
+     - All code changes are complete
+     - All required manual tests have been executed by you (the agent)
+     - All test results have been verified
+     - Database state has been restored (if applicable)
+     - All test outcomes have been documented
+   
    - Continue to next task
 
    **Pause if:**
@@ -141,12 +169,16 @@ What would you like to do?
 **Guardrails**
 - Keep going through tasks until done or blocked
 - Always read context files before starting (from the apply instructions output)
+- **CRITICAL**: Read `.claude/rules/openspec-tasks-mandatory-steps.mdc` before implementing to understand mandatory testing requirements
 - If task is ambiguous, pause and ask before implementing
 - If implementation reveals issues, pause and suggest artifact updates
 - Keep code changes minimal and scoped to each task
-- Update task checkbox immediately after completing each task
+- **For manual testing tasks**: Execute all tests yourself (curl for endpoints, Playwright MCP for E2E) - NEVER delegate to user
+- **Mark tasks complete**: Only mark tasks as complete AFTER executing all required manual tests and verifying results
+- Update task checkbox immediately after completing each task AND verifying all tests pass
 - Pause on errors, blockers, or unclear requirements - don't guess
 - Use contextFiles from CLI output, don't assume specific file names
+- **Never ask user to run tests** - you must execute curl commands and E2E tests yourself
 
 **Fluid Workflow Integration**
 
