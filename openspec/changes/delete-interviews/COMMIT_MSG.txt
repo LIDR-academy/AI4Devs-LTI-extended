@@ -1,0 +1,17 @@
+feat(delete-interviews): add delete interview for candidate (SCRUM-4)
+
+Enable recruiters to delete pending interviews via DELETE API and delete
+button with confirmation modal in CandidateDetails.
+
+Backend:
+- DELETE /candidates/:candidateId/interviews/:interviewId with required
+  reason; validateInterviewDeletion; deleteInterview in service (business
+  rule: only Pending deletable); deleteInterviewController; route.
+
+Frontend:
+- Delete icon next to each interview (only when deletable); confirmation
+  modal with reason input; deleteInterview in interviewService; list
+  refresh after deletion.
+
+OpenSpec:
+- Change artifacts: proposal, design, tasks, spec, CURL_TESTING, E2E_TEST_REPORT.
