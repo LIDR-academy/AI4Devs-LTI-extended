@@ -23,5 +23,18 @@ export const positionService = {
       console.error('Error fetching position:', error);
       throw error;
     }
+  },
+
+  // Update position (partial update)
+  updatePosition: async (id, positionData) => {
+    try {
+      const response = await axios.patch(`${API_BASE_URL}/positions/${id}`, positionData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating position:', error);
+      const message = error.response?.data?.error ?? error.response?.data?.message ?? error.message ?? 'Error updating position';
+      const err = new Error(message);
+      throw err;
+    }
   }
 }; 

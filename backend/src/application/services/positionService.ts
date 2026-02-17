@@ -111,3 +111,44 @@ export const getCandidateNamesByPositionService = async (positionId: number) => 
         throw new Error('Error retrieving candidate names by position');
     }
 };
+
+const UPDATABLE_FIELDS = [
+    'title', 'description', 'status', 'isVisible', 'location', 'jobDescription',
+    'requirements', 'responsibilities', 'salaryMin', 'salaryMax', 'employmentType',
+    'benefits', 'companyDescription', 'applicationDeadline', 'contactInfo'
+] as const;
+
+export const updatePositionService = async (positionId: number, updateData: Record<string, unknown>): Promise<any> => {
+    try {
+        const existingPosition = await Position.findOne(positionId);
+        if (!existingPosition) {
+            throw new Error('Position not found');
+        }
+
+        for (const field of UPDATABLE_FIELDS) {
+            if (updateData[field] !== undefined) {
+                (existingPosition as any)[field] = field === 'applicationDeadline' && typeof updateData[field] === 'string'
+                    ? new Date(updateData[field] as string)
+                    : updateData[field];
+            }
+        }
+
+        if (existingPosition.salaryMin !== undefined && existingPosition.salaryMax !== undefined) {
+            if (existingPosition.salaryMax < existingPosition.salaryMin) {
+                throw new Error('salaryMax must be greater than or equal to salaryMin');
+            }
+        }
+
+        const updated = await existingPosition.save();
+        return updated;
+    } catch (error) {
+        if (error instanceof Error && error.message === 'Position not found') {
+            throw error;
+        }
+        if (error instanceof Error && error.message.includes('salaryMax')) {
+            throw error;
+        }
+        console.error('Error updating position:', error);
+        throw new Error('Error updating position');
+    }
+};

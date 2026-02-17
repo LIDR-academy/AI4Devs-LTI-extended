@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { getCandidatesByPositionService, getInterviewFlowByPositionService, getAllPositionsService, getCandidateNamesByPositionService, getPositionByIdService } from '../../application/services/positionService';
+import { getCandidatesByPositionService, getInterviewFlowByPositionService, getAllPositionsService, getCandidateNamesByPositionService, getPositionByIdService, updatePositionService } from '../../application/services/positionService';
+import { validatePositionUpdateData } from '../../application/validator';
 
 
 export const getAllPositions = async (req: Request, res: Response) => {
@@ -86,5 +87,47 @@ export const getCandidateNamesByPosition = async (req: Request, res: Response) =
         } else {
             res.status(500).json({ message: 'Error retrieving candidate names', error: String(error) });
         }
+    }
+};
+
+export const updatePosition = async (req: Request, res: Response) => {
+    try {
+        const positionId = parseInt(req.params.id);
+        if (isNaN(positionId)) {
+            return res.status(400).json({
+                message: 'Invalid position ID format',
+                error: 'Position ID must be a valid number'
+            });
+        }
+
+        try {
+            validatePositionUpdateData(req.body);
+        } catch (validationError) {
+            const message = validationError instanceof Error ? validationError.message : String(validationError);
+            return res.status(400).json({
+                message: 'Validation error',
+                error: message
+            });
+        }
+
+        const updated = await updatePositionService(positionId, req.body);
+        res.status(200).json(updated);
+    } catch (error) {
+        if (error instanceof Error) {
+            if (error.message === 'Position not found') {
+                return res.status(404).json({
+                    message: 'Position not found',
+                    error: error.message
+                });
+            }
+            return res.status(500).json({
+                message: 'Error updating position',
+                error: error.message
+            });
+        }
+        res.status(500).json({
+            message: 'Error updating position',
+            error: String(error)
+        });
     }
 };
