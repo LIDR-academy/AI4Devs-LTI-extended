@@ -1,0 +1,17 @@
+feat(edit-interview): add edit interview for candidate (SCRUM-3)
+
+Enable recruiters to update existing interview details (date, step, employee,
+score, notes, result) via PATCH API and edit modal in CandidateDetails.
+
+Backend:
+- PATCH /candidates/:candidateId/interviews/:interviewId with partial update
+  support; validateInterviewUpdateData; updateInterview in service;
+  updateInterviewController; route and unit tests.
+
+Frontend:
+- Edit icon next to each interview; modal with pre-filled form (date, step,
+  employee, result, score, notes); updateInterview in interviewService;
+  validation and error handling.
+
+OpenSpec:
+- Change artifacts: proposal, design, tasks, spec, CURL_TESTING.
