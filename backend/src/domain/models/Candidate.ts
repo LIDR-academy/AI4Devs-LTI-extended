@@ -143,14 +143,20 @@ export class Candidate {
                         },
                         interviews: {
                             select: {
+                                id: true,
+                                applicationId: true,
+                                interviewStepId: true,
+                                employeeId: true,
                                 interviewDate: true,
+                                result: true,
+                                score: true,
+                                notes: true,
                                 interviewStep: {
                                     select: {
+                                        id: true,
                                         name: true
                                     }
-                                },
-                                notes: true,
-                                score: true
+                                }
                             }
                         }
                     }

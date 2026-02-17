@@ -53,4 +53,10 @@ export class Interview {
         if (!data) return null;
         return new Interview(data);
     }
+
+    static async delete(id: number): Promise<void> {
+        await prisma.interview.delete({
+            where: { id },
+        });
+    }
 }

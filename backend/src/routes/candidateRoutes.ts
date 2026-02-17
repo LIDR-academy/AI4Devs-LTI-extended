@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import { addCandidate, getCandidateById, updateCandidateStageController, getAllCandidatesController } from '../presentation/controllers/candidateController';
+import { createInterviewController, updateInterviewController, deleteInterviewController } from '../presentation/controllers/interviewController';
 
 const router = Router();
 
-// GET /candidates - Obtener todos los candidatos
+// GET /candidates - Get all candidates
 router.get('/', getAllCandidatesController);
 
 router.post('/', async (req, res) => {
   try {
-    // console.log(req.body); //Just in case you want to inspect the request body
     const result = await addCandidate(req.body);
     res.status(201).send(result);
   } catch (error) {
@@ -19,6 +19,11 @@ router.post('/', async (req, res) => {
     }
   }
 });
+
+// Interview routes - must be before /:id to avoid route conflicts
+router.post('/:candidateId/interviews', createInterviewController);
+router.patch('/:candidateId/interviews/:interviewId', updateInterviewController);
+router.delete('/:candidateId/interviews/:interviewId', deleteInterviewController);
 
 router.get('/:id', getCandidateById);
 
