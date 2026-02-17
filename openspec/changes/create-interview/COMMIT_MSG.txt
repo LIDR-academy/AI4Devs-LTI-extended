@@ -1,0 +1,21 @@
+feat(create-interview): add create interview for candidate (SCRUM-2)
+
+Implement the Create Interview for Candidate feature so recruiters can
+schedule and record interviews for candidates who have applied to positions.
+
+Backend:
+- POST /candidates/:candidateId/interviews with full validation (application,
+  interview step, employee, date, optional score 0-5 and notes max 1000 chars).
+- validateInterviewData in validator; createInterview in interviewService;
+  createInterviewController; route and employee routes for form selector.
+- Candidate.findOne includes interviews on applications for list refresh.
+- Unit tests for controller and service (create flow).
+
+Frontend:
+- Create interview form in CandidateDetails: application, interview step,
+  employee, date (default today/now), result (default Pending), score, notes.
+- interviewService.createInterview; form validation and success/error handling.
+
+OpenSpec:
+- Change artifacts: create-interview.md, design, proposal, tasks, specs,
+  CHANGES_LIST, E2E_TEST_REPORT, IMPLEMENTATION_SUMMARY, VERIFICATION_REPORT.
