@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: ingesta_employees
+    description: "Capa de ingesta de empleados."
+    columns:
+      - name: employee_id
+        tests:
+          - not_null
+          - unique
+      - name: employee_email
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_employees
+    description: "Datos limpios y normalizados para analitica."
+    columns:
+      - name: company_name
+        tests:
+          - not_null
+      - name: role
+        tests:
+          - not_null
+      - name: is_active
+        tests:
+          - not_null
+
+  - name: trf_employee_role_summary
+    description: "Agregados por rol y compania."
+    columns:
+      - name: total_employees
+        tests:
+          - not_null
+      - name: active_ratio_pct
+        tests:
+          - not_null
+
+  - name: employee_role_kpis
+    description: "Dataset final para consumo."
+    columns:
+      - name: employee_id
+        tests:
+          - not_null
+          - unique
+      - name: role_total_employees
+        tests:
+          - not_null

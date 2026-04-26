@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Datos crudos de empleados cargados via dbt seed."
+    schema: "{{ target.schema }}"
+    tables:
+      - name: raw_employees
+        description: "Dataset inicial que simula la ingesta desde sistema fuente."
+        columns:
+          - name: employee_id
+            tests:
+              - not_null
+          - name: employee_email
+            tests:
+              - not_null

@@ -1,0 +1,12 @@
+lti_data_pipeline:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      port: 5432
+      user: postgres
+      password: postgres
+      dbname: lti
+      schema: analytics
+      threads: 1

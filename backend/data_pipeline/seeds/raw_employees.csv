@@ -1,0 +1,7 @@
+employee_id,company_name,employee_name,employee_email,role,is_active
+1,LTI,Alice Johnson,alice.johnson@lti.com,Interviewer,true
+2,LTI,Bob Miller,bob.miller@lti.com,Hiring Manager,true
+3,LTI,Carol Williams,carol.williams@lti.com,Technical Lead,true
+4,LTI,David Brown,david.brown@lti.com,Senior Developer,true
+5,LTI,Emma Davis,emma.davis@lti.com,HR Specialist,true
+6,LTI,Legacy Recruiter,legacy.recruiter@lti.com,Interviewer,false

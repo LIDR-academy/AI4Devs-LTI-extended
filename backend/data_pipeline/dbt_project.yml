@@ -1,0 +1,38 @@
+name: "lti_data_pipeline"
+version: "1.0.0"
+config-version: 2
+
+profile: "lti_data_pipeline"
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  lti_data_pipeline:
+    ingesta:
+      +materialized: view
+    staging:
+      +materialized: view
+    transformacion:
+      +materialized: table
+    consumo:
+      +materialized: view
+
+seeds:
+  lti_data_pipeline:
+    +quote_columns: false
+    raw_employees:
+      +column_types:
+        employee_id: integer
+        company_name: text
+        employee_name: text
+        employee_email: text
+        role: text
+        is_active: boolean
