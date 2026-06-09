@@ -247,6 +247,63 @@ export const validateInterviewDeletion = (candidateId: any, interviewId: any, de
     }
 };
 
+const INTERVIEW_CREATE_ALLOWED_FIELDS = ['applicationId', 'interviewStepId', 'employeeId', 'interviewDate', 'result', 'score', 'notes'];
+
+export const validateInterviewCreateData = (data: any): void => {
+    if (data === null || data === undefined || typeof data !== 'object' || Array.isArray(data)) {
+        throw new Error('Request body is required');
+    }
+
+    for (const key of Object.keys(data)) {
+        if (!INTERVIEW_CREATE_ALLOWED_FIELDS.includes(key)) {
+            throw new Error(`Unexpected field: ${key}`);
+        }
+    }
+
+    if (data.applicationId === undefined || data.applicationId === null) {
+        throw new Error('applicationId is required');
+    }
+    if (typeof data.applicationId !== 'number' || !Number.isInteger(data.applicationId) || data.applicationId <= 0) {
+        throw new Error('applicationId must be a positive integer');
+    }
+
+    if (data.interviewStepId === undefined || data.interviewStepId === null) {
+        throw new Error('interviewStepId is required');
+    }
+    if (typeof data.interviewStepId !== 'number' || !Number.isInteger(data.interviewStepId) || data.interviewStepId <= 0) {
+        throw new Error('interviewStepId must be a positive integer');
+    }
+
+    if (data.employeeId === undefined || data.employeeId === null) {
+        throw new Error('employeeId is required');
+    }
+    if (typeof data.employeeId !== 'number' || !Number.isInteger(data.employeeId) || data.employeeId <= 0) {
+        throw new Error('employeeId must be a positive integer');
+    }
+
+    if (data.interviewDate === undefined || data.interviewDate === null) {
+        throw new Error('interviewDate is required');
+    }
+    if (typeof data.interviewDate !== 'string') throw new Error('interviewDate must be a string');
+    if (!isValidISO8601DateTime(data.interviewDate)) throw new Error('interviewDate must be valid ISO 8601');
+
+    if (data.score !== undefined && data.score !== null) {
+        if (typeof data.score !== 'number' || !Number.isInteger(data.score) || data.score < 0 || data.score > 5) {
+            throw new Error('Score must be between 0 and 5');
+        }
+    }
+
+    if (data.notes !== undefined && data.notes !== null) {
+        if (typeof data.notes !== 'string') throw new Error('notes must be a string');
+        if (data.notes.length > 1000) throw new Error('Notes must not exceed 1000 characters');
+    }
+
+    if (data.result !== undefined && data.result !== null) {
+        if (typeof data.result !== 'string') throw new Error('result must be a string');
+        if (!INTERVIEW_RESULT_VALUES.includes(data.result)) throw new Error('Invalid result value');
+    }
+};
+
 export const validateCandidatePositionDeletion = (positionId: any, candidateId: any): void => {
     if (typeof positionId !== 'number' || !Number.isInteger(positionId) || positionId <= 0) {
         throw new Error('positionId must be a positive integer');

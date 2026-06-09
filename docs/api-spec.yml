@@ -201,6 +201,68 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /candidates/{candidateId}/interviews:
+    post:
+      summary: Create a new interview for a candidate
+      description: Creates a new interview for one of the candidate's applications. Validates that the application belongs to the candidate, the interview step belongs to the position's interview flow, and the employee is active.
+      tags:
+        - Candidates
+      parameters:
+        - in: path
+          name: candidateId
+          required: true
+          schema:
+            type: integer
+          description: ID of the candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInterviewRequest'
+            example:
+              applicationId: 1
+              interviewStepId: 2
+              employeeId: 3
+              interviewDate: "2026-06-20T10:00:00Z"
+              result: "Pending"
+              score: 4
+              notes: "Strong technical candidate"
+      responses:
+        '201':
+          description: Interview created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterviewResponse'
+              example:
+                id: 99
+                applicationId: 1
+                interviewStepId: 2
+                employeeId: 3
+                interviewDate: "2026-06-20T10:00:00.000Z"
+                result: "Pending"
+                score: 4
+                notes: "Strong technical candidate"
+        '400':
+          description: Validation error or business rule violation (step not in flow, employee not active)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Candidate, application, interview step, or employee not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /candidates/{candidateId}/interviews/{interviewId}:
     patch:
       summary: Update an existing interview
@@ -1433,6 +1495,48 @@ components:
         notes:
           type: string
           nullable: true
+
+    CreateInterviewRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - applicationId
+        - interviewStepId
+        - employeeId
+        - interviewDate
+      properties:
+        applicationId:
+          type: integer
+          minimum: 1
+          description: ID of the application (must belong to the path candidateId)
+        interviewStepId:
+          type: integer
+          minimum: 1
+          description: ID of the interview step (must belong to the application's position's interview flow)
+        employeeId:
+          type: integer
+          minimum: 1
+          description: ID of the interviewing employee (must be active)
+        interviewDate:
+          type: string
+          format: date-time
+          description: ISO 8601 date-time of the interview
+        result:
+          type: string
+          nullable: true
+          enum: [Pending, Passed, Failed]
+          description: Interview result (defaults to Pending when omitted)
+        score:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 5
+          description: Interview score (0-5 inclusive or null)
+        notes:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Optional notes (max 1000 characters)
 
     UpdateInterviewRequest:
       type: object

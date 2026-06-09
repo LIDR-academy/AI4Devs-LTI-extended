@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Offcanvas, Form, Button, Alert, Modal } from 'react-bootstrap';
-import { Pencil, Trash } from 'react-bootstrap-icons';
+import { Pencil, PlusCircle, Trash } from 'react-bootstrap-icons';
 import { useTranslation } from 'react-i18next';
-import { updateInterview, deleteInterview } from '../services/interviewService';
+import { createInterview, updateInterview, deleteInterview } from '../services/interviewService';
 import { positionService } from '../services/positionService';
 import './CandidateDetails.css';
 
@@ -18,6 +18,15 @@ const isInterviewDeletable = (interview) => {
 };
 
 const getInitialEditFormState = () => ({
+  interviewStepId: '',
+  employeeId: '',
+  interviewDate: '',
+  score: null,
+  notes: '',
+  result: 'Pending'
+});
+
+const getInitialCreateFormState = () => ({
   interviewStepId: '',
   employeeId: '',
   interviewDate: '',
@@ -58,6 +67,14 @@ const CandidateDetails = ({ candidate, onClose, onApplicationRemoved }) => {
   const [removeApplicationLoading, setRemoveApplicationLoading] = useState(false);
   const [removeApplicationError, setRemoveApplicationError] = useState(null);
 
+  const [creatingForApplication, setCreatingForApplication] = useState(null);
+  const [createInterviewData, setCreateInterviewData] = useState(getInitialCreateFormState());
+  const [createSteps, setCreateSteps] = useState([]);
+  const [createStepsLoading, setCreateStepsLoading] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState(null);
+  const [createValidationErrors, setCreateValidationErrors] = useState({});
+
   useEffect(() => {
     if (candidate) {
       setError(null);
@@ -70,7 +87,7 @@ const CandidateDetails = ({ candidate, onClose, onApplicationRemoved }) => {
           setError(t('interviews.failedToLoad'));
         });
     }
-  }, [candidate, t]);
+  }, [candidate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!candidate) return;
@@ -106,20 +123,6 @@ const CandidateDetails = ({ candidate, onClose, onApplicationRemoved }) => {
         .then((data) => {
           const steps = data?.interviewFlow?.interviewFlow?.interviewSteps ?? [];
           const currentStep = interview.interviewStep;
-          // #region agent log
-          const stepIds = (steps || []).map((s) => (s == null ? 'null' : s.id));
-          fetch('http://127.0.0.1:7242/ingest/01a6f721-0594-4e0b-a031-946eb64c655e', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              location: 'CandidateDetails.js:openEditModal',
-              message: 'interviewFlow steps',
-              data: { currentStepIsNull: currentStep == null, stepIds },
-              timestamp: Date.now(),
-              hypothesisId: 'H4'
-            })
-          }).catch(() => {});
-          // #endregion
           const hasCurrent = currentStep?.id != null && steps.some((s) => Number(s.id) === Number(currentStep.id));
           const stepsToSet = hasCurrent || !currentStep?.id ? steps : [{ id: currentStep.id, name: currentStep.name }, ...steps];
           setEditSteps(stepsToSet);
@@ -159,6 +162,102 @@ const CandidateDetails = ({ candidate, onClose, onApplicationRemoved }) => {
     if (removeApplicationLoading) return;
     setRemoveApplicationModal(null);
     setRemoveApplicationError(null);
+  };
+
+  const openCreateModal = (application) => {
+    setCreatingForApplication(application);
+    setCreateInterviewData(getInitialCreateFormState());
+    setCreateError(null);
+    setCreateValidationErrors({});
+    setCreateSteps([]);
+    const positionId = application?.position?.id;
+    if (positionId) {
+      setCreateStepsLoading(true);
+      fetch(`${API_BASE_URL}/positions/${positionId}/interviewFlow`)
+        .then((res) => res.json())
+        .then((data) => {
+          const steps = data?.interviewFlow?.interviewFlow?.interviewSteps ?? [];
+          setCreateSteps(steps);
+        })
+        .catch(() => setCreateSteps([]))
+        .finally(() => setCreateStepsLoading(false));
+    }
+  };
+
+  const closeCreateModal = () => {
+    setCreatingForApplication(null);
+    setCreateInterviewData(getInitialCreateFormState());
+    setCreateError(null);
+    setCreateValidationErrors({});
+    setCreateSteps([]);
+  };
+
+  const handleCreateInputChange = (e) => {
+    const { name, value } = e.target;
+    setCreateInterviewData((prev) => ({ ...prev, [name]: value }));
+    if (createValidationErrors[name]) setCreateValidationErrors((prev) => ({ ...prev, [name]: null }));
+  };
+
+  const handleCreateScoreChange = (value) => {
+    const newScore = createInterviewData.score === value ? null : value;
+    setCreateInterviewData((prev) => ({ ...prev, score: newScore }));
+  };
+
+  const validateCreateForm = () => {
+    const errors = {};
+    if (!createInterviewData.interviewStepId) errors.interviewStepId = t('validation.interviewStep.required');
+    if (!createInterviewData.employeeId) errors.employeeId = t('validation.employee.required');
+    if (!createInterviewData.interviewDate) errors.interviewDate = t('validation.interviewDate.required');
+    if (createInterviewData.notes && createInterviewData.notes.length > NOTES_MAX_LENGTH) {
+      errors.notes = t('validation.notes.tooLong', { max: NOTES_MAX_LENGTH });
+    }
+    setCreateValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleCreateSubmit = async (e) => {
+    e.preventDefault();
+    setCreateError(null);
+    if (!validateCreateForm() || !creatingForApplication || !candidate) return;
+
+    const interviewDateISO = createInterviewData.interviewDate
+      ? new Date(createInterviewData.interviewDate).toISOString()
+      : undefined;
+
+    const payload = {
+      applicationId: creatingForApplication.id,
+      interviewStepId: Number(createInterviewData.interviewStepId),
+      employeeId: Number(createInterviewData.employeeId),
+      interviewDate: interviewDateISO,
+      result: createInterviewData.result || 'Pending',
+      score: createInterviewData.score != null && createInterviewData.score !== '' ? Number(createInterviewData.score) : null,
+      notes: createInterviewData.notes && createInterviewData.notes.trim() ? createInterviewData.notes.trim() : null
+    };
+
+    setCreateLoading(true);
+    try {
+      const created = await createInterview(candidate.id, payload);
+      setSuccessMessage(t('interviews.createSuccess'));
+      setCandidateDetails((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          applications: prev.applications.map((app) =>
+            app.id === creatingForApplication.id
+              ? {
+                  ...app,
+                  interviews: [...(app.interviews || []), created]
+                }
+              : app
+          )
+        };
+      });
+      closeCreateModal();
+    } catch (err) {
+      setCreateError(err.message || t('interviews.failedToCreate'));
+    } finally {
+      setCreateLoading(false);
+    }
   };
 
   const handleRemoveApplicationConfirm = async () => {
@@ -381,7 +480,18 @@ const CandidateDetails = ({ candidate, onClose, onApplicationRemoved }) => {
                     </Button>
                   </div>
                   <p>{t('candidates.details.applicationDate')} {new Date(app.applicationDate).toLocaleDateString()}</p>
-                  <h5 className="mt-3 mb-2">{t('candidates.details.interviews')}</h5>
+                  <div className="d-flex justify-content-between align-items-center mt-3 mb-2">
+                    <h5 className="mb-0">{t('candidates.details.interviews')}</h5>
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={() => openCreateModal(app)}
+                      aria-label={t('interviews.addInterview')}
+                    >
+                      <PlusCircle size={14} className="me-1" />
+                      {t('interviews.addInterview')}
+                    </Button>
+                  </div>
                   {app.interviews?.length ? (
                     [...app.interviews]
                       .sort((a, b) => new Date(a.interviewDate) - new Date(b.interviewDate))
@@ -571,41 +681,8 @@ const CandidateDetails = ({ candidate, onClose, onApplicationRemoved }) => {
 
                   <div className="d-flex gap-2 justify-content-end flex-wrap">
                     {editingInterview != null && isInterviewDeletable(editingInterview) && (() => {
-                      // #region agent log
-                      const apps = candidateDetails?.applications ?? [];
-                      const interviewIdsPerApp = apps.map((a) => ({
-                        appId: a?.id,
-                        interviewIds: (a?.interviews || []).map((x) => (x == null ? 'null' : x.id))
-                      }));
-                      fetch('http://127.0.0.1:7242/ingest/01a6f721-0594-4e0b-a031-946eb64c655e', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          location: 'CandidateDetails.js:appForEdit',
-                          message: 'before find',
-                          data: { editingInterviewId: editingInterview?.id, interviewIdsPerApp },
-                          timestamp: Date.now(),
-                          hypothesisId: 'post-fix'
-                        })
-                      }).catch(() => {});
-                      // #endregion
                       const appForEdit = candidateDetails?.applications?.find((a) =>
-                        (a.interviews || []).some((i) => {
-                          // #region agent log
-                          fetch('http://127.0.0.1:7242/ingest/01a6f721-0594-4e0b-a031-946eb64c655e', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              location: 'CandidateDetails.js:some(i)',
-                              message: 'inside some callback',
-                              data: { iIsNull: i == null, iId: i != null ? i.id : undefined },
-                              timestamp: Date.now(),
-                              hypothesisId: 'post-fix'
-                            })
-                          }).catch(() => {});
-                          // #endregion
-                          return i != null && i.id === editingInterview.id;
-                        })
+                        (a.interviews || []).some((i) => i != null && i.id === editingInterview.id)
                       );
                       return (
                         <Button
@@ -675,6 +752,160 @@ const CandidateDetails = ({ candidate, onClose, onApplicationRemoved }) => {
                     {deleteLoading ? t('interviews.deleting') : t('interviews.confirmDelete')}
                   </Button>
                 </div>
+              </Modal.Body>
+            </Modal>
+
+            <Modal show={!!creatingForApplication} onHide={closeCreateModal}>
+              <Modal.Header closeButton>
+                <Modal.Title>{t('interviews.createTitle')}</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                {createError && <Alert variant="danger">{createError}</Alert>}
+                <Form onSubmit={handleCreateSubmit}>
+                  <Form.Group className="mb-2">
+                    <Form.Label>{t('interviews.application')}</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={creatingForApplication?.position?.title ?? ''}
+                      readOnly
+                      disabled
+                      aria-label={t('interviews.application')}
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-2">
+                    <Form.Label>{t('interviews.dateTime')}</Form.Label>
+                    <Form.Control
+                      type="datetime-local"
+                      name="interviewDate"
+                      value={createInterviewData.interviewDate}
+                      onChange={handleCreateInputChange}
+                      isInvalid={!!createValidationErrors.interviewDate}
+                      aria-label={t('interviews.dateTime')}
+                    />
+                    {createValidationErrors.interviewDate && (
+                      <Form.Control.Feedback type="invalid">
+                        {createValidationErrors.interviewDate}
+                      </Form.Control.Feedback>
+                    )}
+                  </Form.Group>
+
+                  <Form.Group className="mb-2">
+                    <Form.Label>{t('interviews.step')}</Form.Label>
+                    <Form.Select
+                      name="interviewStepId"
+                      value={createInterviewData.interviewStepId}
+                      onChange={handleCreateInputChange}
+                      disabled={createStepsLoading}
+                      isInvalid={!!createValidationErrors.interviewStepId}
+                      aria-label={t('interviews.step')}
+                    >
+                      <option value="">{t('interviews.selectStep')}</option>
+                      {createSteps.map((step) => (
+                        <option key={step.id} value={String(step.id)}>
+                          {step.name}
+                        </option>
+                      ))}
+                    </Form.Select>
+                    {createValidationErrors.interviewStepId && (
+                      <Form.Control.Feedback type="invalid">
+                        {createValidationErrors.interviewStepId}
+                      </Form.Control.Feedback>
+                    )}
+                  </Form.Group>
+
+                  <Form.Group className="mb-2">
+                    <Form.Label>{t('interviews.employee')}</Form.Label>
+                    <Form.Select
+                      name="employeeId"
+                      value={createInterviewData.employeeId}
+                      onChange={handleCreateInputChange}
+                      isInvalid={!!createValidationErrors.employeeId}
+                      aria-label={t('interviews.employee')}
+                    >
+                      <option value="">{t('interviews.selectEmployee')}</option>
+                      {employees.map((emp) => (
+                        <option key={emp.id} value={String(emp.id)}>
+                          {emp.name} ({emp.email})
+                        </option>
+                      ))}
+                    </Form.Select>
+                    {createValidationErrors.employeeId && (
+                      <Form.Control.Feedback type="invalid">
+                        {createValidationErrors.employeeId}
+                      </Form.Control.Feedback>
+                    )}
+                  </Form.Group>
+
+                  <Form.Group className="mb-2">
+                    <Form.Label>{t('interviews.result')}</Form.Label>
+                    <Form.Select
+                      name="result"
+                      value={createInterviewData.result}
+                      onChange={handleCreateInputChange}
+                      aria-label={t('interviews.result')}
+                    >
+                      {INTERVIEW_RESULTS.map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+
+                  <Form.Group className="mb-2">
+                    <Form.Label>{t('interviews.score')}</Form.Label>
+                    <div role="group" aria-label={t('interviews.score')}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          role="button"
+                          tabIndex={0}
+                          style={{
+                            cursor: 'pointer',
+                            color: (createInterviewData.score ?? 0) >= star ? 'gold' : 'gray',
+                            marginRight: 2
+                          }}
+                          onClick={() => handleCreateScoreChange(star)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleCreateScoreChange(star)}
+                          aria-label={t('interviews.scoreLabel', { star })}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  </Form.Group>
+
+                  <Form.Group className="mb-2">
+                    <Form.Label>{t('interviews.notes', { max: NOTES_MAX_LENGTH })}</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      name="notes"
+                      value={createInterviewData.notes}
+                      onChange={handleCreateInputChange}
+                      isInvalid={!!createValidationErrors.notes}
+                      aria-label={t('interviews.notes', { max: NOTES_MAX_LENGTH })}
+                    />
+                    <Form.Text className="text-muted">
+                      {(createInterviewData.notes || '').length}/{NOTES_MAX_LENGTH}
+                    </Form.Text>
+                    {createValidationErrors.notes && (
+                      <Form.Control.Feedback type="invalid">
+                        {createValidationErrors.notes}
+                      </Form.Control.Feedback>
+                    )}
+                  </Form.Group>
+
+                  <div className="d-flex gap-2 justify-content-end">
+                    <Button variant="secondary" onClick={closeCreateModal} disabled={createLoading}>
+                      {t('common.cancel')}
+                    </Button>
+                    <Button variant="primary" type="submit" disabled={createLoading}>
+                      {createLoading ? t('interviews.saving') : t('interviews.save')}
+                    </Button>
+                  </div>
+                </Form>
               </Modal.Body>
             </Modal>
 

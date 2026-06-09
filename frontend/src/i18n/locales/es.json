@@ -218,7 +218,11 @@
     "updateSuccess": "¡Entrevista actualizada con éxito!",
     "deleteSuccess": "Entrevista eliminada con éxito.",
     "editInterview": "Editar entrevista",
-    "deleteInterview": "Eliminar entrevista"
+    "deleteInterview": "Eliminar entrevista",
+    "createTitle": "Crear Entrevista",
+    "addInterview": "Añadir entrevista",
+    "createSuccess": "Entrevista creada exitosamente",
+    "failedToCreate": "Error al crear la entrevista"
   },
   "fileUploader": {
     "upload": "Subir Archivo",

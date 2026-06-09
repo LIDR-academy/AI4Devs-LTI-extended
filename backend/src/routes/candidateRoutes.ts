@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { addCandidate, getCandidateById, updateCandidateStageController, getAllCandidatesController } from '../presentation/controllers/candidateController';
-import { updateInterviewController, deleteInterviewController } from '../presentation/controllers/interviewController';
+import { updateInterviewController, deleteInterviewController, createInterviewController } from '../presentation/controllers/interviewController';
 
 const router = Router();
 
@@ -21,6 +21,7 @@ router.post('/', async (req, res) => {
 });
 
 // Interview routes - must be before /:id to avoid route conflicts
+router.post('/:candidateId/interviews', createInterviewController);
 router.patch('/:candidateId/interviews/:interviewId', updateInterviewController);
 router.delete('/:candidateId/interviews/:interviewId', deleteInterviewController);
 
