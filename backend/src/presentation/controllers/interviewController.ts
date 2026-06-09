@@ -1,6 +1,78 @@
 import { Request, Response, NextFunction } from 'express';
-import { updateInterview, deleteInterview } from '../../application/services/interviewService';
-import { validateInterviewUpdateData, validateInterviewDeletion } from '../../application/validator';
+import { updateInterview, deleteInterview, createInterview } from '../../application/services/interviewService';
+import { validateInterviewUpdateData, validateInterviewDeletion, validateInterviewCreateData } from '../../application/validator';
+
+/**
+ * @route POST /candidates/:candidateId/interviews
+ * @description Creates a new interview for a candidate's application
+ * @access Public
+ */
+export const createInterviewController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Extract candidateId from URL params
+        const candidateId = parseInt(req.params.candidateId);
+
+        // Validate candidateId format
+        if (isNaN(candidateId)) {
+            return res.status(400).json({
+                message: 'Validation error',
+                error: 'Invalid candidate ID format'
+            });
+        }
+
+        // Extract interview data from request body
+        const interviewData = req.body;
+
+        // Validate interview create data
+        try {
+            validateInterviewCreateData(interviewData);
+        } catch (validationError: any) {
+            return res.status(400).json({
+                message: 'Validation error',
+                error: validationError.message
+            });
+        }
+
+        // Create interview
+        const createdInterview = await createInterview(candidateId, interviewData);
+
+        // Return 201 Created with created interview data
+        return res.status(201).json(createdInterview);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            // Handle business rule validation errors (400) - check these BEFORE 404 checks
+            // Important: "does not belong to the position's interview flow" contains "does not belong"
+            // so must be checked before the general "does not belong" → 404 branch
+            if (error.message.includes('does not belong to the position\'s interview flow') ||
+                error.message.includes('is not active')) {
+                return res.status(400).json({
+                    message: 'Validation error',
+                    error: error.message
+                });
+            }
+
+            // Handle specific error types (404)
+            if (error.message.includes('not found') || error.message.includes('does not belong')) {
+                return res.status(404).json({
+                    message: 'Resource not found',
+                    error: error.message
+                });
+            }
+
+            // Handle other errors as 500
+            return res.status(500).json({
+                message: 'Internal server error',
+                error: 'An unexpected error occurred'
+            });
+        }
+
+        // Handle unknown errors
+        return res.status(500).json({
+            message: 'Internal server error',
+            error: 'An unexpected error occurred'
+        });
+    }
+};
 
 /**
  * @route PATCH /candidates/:candidateId/interviews/:interviewId

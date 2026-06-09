@@ -1,4 +1,4 @@
-import { validatePositionUpdateData, validateInterviewUpdateData, validateInterviewDeletion, validateCandidatePositionDeletion } from '../validator';
+import { validatePositionUpdateData, validateInterviewUpdateData, validateInterviewDeletion, validateCandidatePositionDeletion, validateInterviewCreateData } from '../validator';
 
 describe('validatePositionUpdateData', () => {
     describe('Valid update data scenarios', () => {
@@ -814,6 +814,350 @@ describe('validateInterviewDeletion', () => {
             };
 
             expect(() => validateInterviewDeletion(candidateId, interviewId, deletionData)).not.toThrow();
+        });
+    });
+});
+
+describe('validateInterviewCreateData', () => {
+    describe('Valid payload scenarios', () => {
+        it('should not throw for a valid full payload with all fields', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                result: 'Pending',
+                score: 4,
+                notes: 'Strong technical candidate'
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+
+        it('should not throw for a valid minimal payload (result omitted)', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z'
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+
+        it('should not throw when score is null', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                score: null
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+
+        it('should not throw when notes is null', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                notes: null
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+    });
+
+    describe('Missing required fields', () => {
+        it('should throw when applicationId is missing', () => {
+            const invalidData = {
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('applicationId is required');
+        });
+
+        it('should throw when interviewStepId is missing', () => {
+            const invalidData = {
+                applicationId: 1,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('interviewStepId is required');
+        });
+
+        it('should throw when employeeId is missing', () => {
+            const invalidData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                interviewDate: '2026-06-20T10:00:00Z'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('employeeId is required');
+        });
+
+        it('should throw when interviewDate is missing', () => {
+            const invalidData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('interviewDate is required');
+        });
+    });
+
+    describe('Non-integer FK fields', () => {
+        it('should throw when applicationId is not an integer', () => {
+            const invalidData = {
+                applicationId: '1',
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('applicationId must be a positive integer');
+        });
+
+        it('should throw when applicationId is a float', () => {
+            const invalidData = {
+                applicationId: 1.5,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('applicationId must be a positive integer');
+        });
+
+        it('should throw when interviewStepId is not an integer', () => {
+            const invalidData = {
+                applicationId: 1,
+                interviewStepId: '2',
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('interviewStepId must be a positive integer');
+        });
+
+        it('should throw when employeeId is not an integer', () => {
+            const invalidData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: '3',
+                interviewDate: '2026-06-20T10:00:00Z'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('employeeId must be a positive integer');
+        });
+
+        it('should throw when applicationId is zero or negative', () => {
+            const invalidData = {
+                applicationId: 0,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('applicationId must be a positive integer');
+        });
+    });
+
+    describe('Invalid interviewDate format', () => {
+        it('should throw when interviewDate is not ISO 8601 (date-only format)', () => {
+            const invalidData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('interviewDate must be valid ISO 8601');
+        });
+
+        it('should throw when interviewDate is not a valid date string', () => {
+            const invalidData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: 'not-a-date'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('interviewDate must be valid ISO 8601');
+        });
+
+        it('should throw when interviewDate is not a string', () => {
+            const invalidData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: 1234567890
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow();
+        });
+    });
+
+    describe('Score validation', () => {
+        it('should throw when score is less than 0', () => {
+            const invalidData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                score: -1
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('Score must be between 0 and 5');
+        });
+
+        it('should throw when score is greater than 5', () => {
+            const invalidData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                score: 6
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('Score must be between 0 and 5');
+        });
+
+        it('should accept score of 0', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                score: 0
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+
+        it('should accept score of 5', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                score: 5
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+
+        it('should accept null score', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                score: null
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+    });
+
+    describe('Notes validation', () => {
+        it('should throw when notes exceeds 1000 characters', () => {
+            const invalidData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                notes: 'a'.repeat(1001)
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('Notes must not exceed 1000 characters');
+        });
+
+        it('should accept notes with exactly 1000 characters', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                notes: 'a'.repeat(1000)
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+
+        it('should accept null notes', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                notes: null
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+    });
+
+    describe('Result validation', () => {
+        it('should accept result "Pending"', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                result: 'Pending'
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+
+        it('should accept result "Passed"', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                result: 'Passed'
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+
+        it('should accept result "Failed"', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                result: 'Failed'
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+
+        it('should throw when result is an invalid value', () => {
+            const invalidData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                result: 'InvalidResult'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('Invalid result value');
+        });
+
+        it('should accept null result (will default to Pending downstream)', () => {
+            const validData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                result: null
+            };
+            expect(() => validateInterviewCreateData(validData)).not.toThrow();
+        });
+    });
+
+    describe('Unexpected field rejection', () => {
+        it('should throw when an unexpected field is provided', () => {
+            const invalidData = {
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z',
+                unknownField: 'value'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('Unexpected field: unknownField');
+        });
+
+        it('should throw when id field is provided', () => {
+            const invalidData = {
+                id: 99,
+                applicationId: 1,
+                interviewStepId: 2,
+                employeeId: 3,
+                interviewDate: '2026-06-20T10:00:00Z'
+            };
+            expect(() => validateInterviewCreateData(invalidData)).toThrow('Unexpected field: id');
         });
     });
 });

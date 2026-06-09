@@ -88,6 +88,76 @@ export const updateInterview = async (candidateId: number, interviewId: number, 
 };
 
 /**
+ * Creates a new interview for a candidate's application
+ * @param candidateId - The ID of the candidate (from URL path)
+ * @param interviewData - The interview data to create
+ * @returns The created interview
+ * @throws Error if validation fails or resources are not found
+ */
+export const createInterview = async (candidateId: number, interviewData: any): Promise<Interview> => {
+    // Validate candidate exists
+    const candidate = await Candidate.findOne(candidateId);
+    if (!candidate) {
+        throw new Error('Candidate not found');
+    }
+
+    // Validate application exists and belongs to candidate
+    const application = await Application.findOne(interviewData.applicationId);
+    if (!application) {
+        throw new Error('Application not found');
+    }
+    if (application.candidateId !== candidateId) {
+        throw new Error('Application does not belong to the specified candidate');
+    }
+
+    // Validate position for interview step flow check
+    const position = await Position.findOne(application.positionId);
+    if (!position) {
+        throw new Error('Position not found');
+    }
+
+    // Validate interview step exists and belongs to position's flow
+    const interviewStep = await InterviewStep.findOne(interviewData.interviewStepId);
+    if (!interviewStep) {
+        throw new Error('Interview step not found');
+    }
+    if (interviewStep.interviewFlowId !== position.interviewFlowId) {
+        throw new Error('Interview step does not belong to the position\'s interview flow');
+    }
+
+    // Validate employee exists and is active
+    const employee = await Employee.findOne(interviewData.employeeId);
+    if (!employee) {
+        throw new Error('Employee not found');
+    }
+    if (!employee.isActive) {
+        throw new Error('Employee is not active');
+    }
+
+    // Default result to Pending when omitted
+    const result = interviewData.result ?? 'Pending';
+
+    // Construct Interview without id (triggers insert in save())
+    const newInterview = new Interview({
+        applicationId: interviewData.applicationId,
+        interviewStepId: interviewData.interviewStepId,
+        employeeId: interviewData.employeeId,
+        interviewDate: interviewData.interviewDate,
+        result,
+        score: interviewData.score,
+        notes: interviewData.notes,
+    });
+
+    // Save (insert path since id is absent)
+    try {
+        const savedInterview = await newInterview.save();
+        return new Interview(savedInterview);
+    } catch (error: any) {
+        throw new Error(error.message || 'Failed to create interview');
+    }
+};
+
+/**
  * Deletes an interview for a candidate
  * @param candidateId - The ID of the candidate (from URL path)
  * @param interviewId - The ID of the interview to delete

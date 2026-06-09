@@ -1,4 +1,4 @@
-import { updateInterview, deleteInterview } from '../interviewService';
+import { updateInterview, deleteInterview, createInterview } from '../interviewService';
 import { Candidate } from '../../../domain/models/Candidate';
 import { Application } from '../../../domain/models/Application';
 import { Position } from '../../../domain/models/Position';
@@ -546,7 +546,7 @@ describe('Interview Service', () => {
             });
         });
 
-        describe('Database error handling', () => {
+        describe('Database error handling for deleteInterview', () => {
             it('should throw error when database deletion fails', async () => {
                 const candidateId = 1;
                 const interviewId = 2;
@@ -573,6 +573,173 @@ describe('Interview Service', () => {
                 (Interview.delete as jest.Mock).mockRejectedValue(new Error('Database error'));
 
                 await expect(deleteInterview(candidateId, interviewId, deletionData)).rejects.toThrow('Database error');
+            });
+        });
+    });
+
+    describe('createInterview', () => {
+        const validInterviewData = {
+            applicationId: 1,
+            interviewStepId: 2,
+            employeeId: 3,
+            interviewDate: '2026-06-20T10:00:00Z',
+            result: 'Pending',
+            score: 4,
+            notes: 'Strong candidate'
+        };
+
+        const mockCandidate = { id: 1, firstName: 'John', lastName: 'Doe' };
+        const mockApplication = { id: 1, candidateId: 1, positionId: 10 };
+        const mockPosition = { id: 10, interviewFlowId: 5 };
+        const mockInterviewStep = { id: 2, interviewFlowId: 5 };
+        const mockEmployee = { id: 3, isActive: true };
+        const mockCreatedInterview = {
+            id: 99,
+            applicationId: 1,
+            interviewStepId: 2,
+            employeeId: 3,
+            interviewDate: new Date('2026-06-20T10:00:00Z'),
+            result: 'Pending',
+            score: 4,
+            notes: 'Strong candidate'
+        };
+
+        describe('Successful creation', () => {
+            it('should create an interview with all fields', async () => {
+                (Candidate.findOne as jest.Mock).mockResolvedValue(mockCandidate);
+                (Application.findOne as jest.Mock).mockResolvedValue(mockApplication);
+                (Position.findOne as jest.Mock).mockResolvedValue(mockPosition);
+                (InterviewStep.findOne as jest.Mock).mockResolvedValue(mockInterviewStep);
+                (Employee.findOne as jest.Mock).mockResolvedValue(mockEmployee);
+
+                const mockInterviewInstance = {
+                    ...mockCreatedInterview,
+                    save: jest.fn().mockResolvedValue(mockCreatedInterview)
+                };
+                (Interview as unknown as jest.Mock).mockImplementation(() => mockInterviewInstance);
+
+                const result = await createInterview(1, validInterviewData);
+
+                expect(Candidate.findOne).toHaveBeenCalledWith(1);
+                expect(Application.findOne).toHaveBeenCalledWith(1);
+                expect(Position.findOne).toHaveBeenCalledWith(10);
+                expect(InterviewStep.findOne).toHaveBeenCalledWith(2);
+                expect(Employee.findOne).toHaveBeenCalledWith(3);
+                expect(mockInterviewInstance.save).toHaveBeenCalled();
+                expect(result.id).toBe(99);
+            });
+
+            it('should create an interview with minimal fields (result defaults to Pending)', async () => {
+                const minimalData = {
+                    applicationId: 1,
+                    interviewStepId: 2,
+                    employeeId: 3,
+                    interviewDate: '2026-06-20T10:00:00Z'
+                    // result omitted
+                };
+
+                (Candidate.findOne as jest.Mock).mockResolvedValue(mockCandidate);
+                (Application.findOne as jest.Mock).mockResolvedValue(mockApplication);
+                (Position.findOne as jest.Mock).mockResolvedValue(mockPosition);
+                (InterviewStep.findOne as jest.Mock).mockResolvedValue(mockInterviewStep);
+                (Employee.findOne as jest.Mock).mockResolvedValue(mockEmployee);
+
+                const mockInterviewInstance = {
+                    ...mockCreatedInterview,
+                    result: 'Pending',
+                    save: jest.fn().mockResolvedValue({ ...mockCreatedInterview, result: 'Pending' })
+                };
+                (Interview as unknown as jest.Mock).mockImplementation((data) => {
+                    expect(data.result).toBe('Pending');
+                    return mockInterviewInstance;
+                });
+
+                const result = await createInterview(1, minimalData);
+
+                expect(result.result).toBe('Pending');
+            });
+        });
+
+        describe('Candidate not found', () => {
+            it('should throw error when candidate does not exist', async () => {
+                (Candidate.findOne as jest.Mock).mockResolvedValue(null);
+
+                await expect(createInterview(999, validInterviewData)).rejects.toThrow('not found');
+            });
+        });
+
+        describe('Application not found', () => {
+            it('should throw error when application does not exist', async () => {
+                (Candidate.findOne as jest.Mock).mockResolvedValue(mockCandidate);
+                (Application.findOne as jest.Mock).mockResolvedValue(null);
+
+                await expect(createInterview(1, validInterviewData)).rejects.toThrow('not found');
+            });
+
+            it('should throw error when application does not belong to candidate', async () => {
+                (Candidate.findOne as jest.Mock).mockResolvedValue(mockCandidate);
+                (Application.findOne as jest.Mock).mockResolvedValue({ ...mockApplication, candidateId: 999 });
+
+                await expect(createInterview(1, validInterviewData)).rejects.toThrow();
+            });
+        });
+
+        describe('Interview step validation', () => {
+            it('should throw error when interview step does not exist', async () => {
+                (Candidate.findOne as jest.Mock).mockResolvedValue(mockCandidate);
+                (Application.findOne as jest.Mock).mockResolvedValue(mockApplication);
+                (Position.findOne as jest.Mock).mockResolvedValue(mockPosition);
+                (InterviewStep.findOne as jest.Mock).mockResolvedValue(null);
+
+                await expect(createInterview(1, validInterviewData)).rejects.toThrow('not found');
+            });
+
+            it('should throw error when interview step does not belong to position interview flow', async () => {
+                (Candidate.findOne as jest.Mock).mockResolvedValue(mockCandidate);
+                (Application.findOne as jest.Mock).mockResolvedValue(mockApplication);
+                (Position.findOne as jest.Mock).mockResolvedValue(mockPosition);
+                (InterviewStep.findOne as jest.Mock).mockResolvedValue({ id: 2, interviewFlowId: 99 }); // different flow
+
+                await expect(createInterview(1, validInterviewData)).rejects.toThrow('does not belong to the position\'s interview flow');
+            });
+        });
+
+        describe('Employee validation', () => {
+            it('should throw error when employee does not exist', async () => {
+                (Candidate.findOne as jest.Mock).mockResolvedValue(mockCandidate);
+                (Application.findOne as jest.Mock).mockResolvedValue(mockApplication);
+                (Position.findOne as jest.Mock).mockResolvedValue(mockPosition);
+                (InterviewStep.findOne as jest.Mock).mockResolvedValue(mockInterviewStep);
+                (Employee.findOne as jest.Mock).mockResolvedValue(null);
+
+                await expect(createInterview(1, validInterviewData)).rejects.toThrow('not found');
+            });
+
+            it('should throw error when employee is not active', async () => {
+                (Candidate.findOne as jest.Mock).mockResolvedValue(mockCandidate);
+                (Application.findOne as jest.Mock).mockResolvedValue(mockApplication);
+                (Position.findOne as jest.Mock).mockResolvedValue(mockPosition);
+                (InterviewStep.findOne as jest.Mock).mockResolvedValue(mockInterviewStep);
+                (Employee.findOne as jest.Mock).mockResolvedValue({ id: 3, isActive: false });
+
+                await expect(createInterview(1, validInterviewData)).rejects.toThrow('is not active');
+            });
+        });
+
+        describe('Database error handling', () => {
+            it('should propagate database errors on save', async () => {
+                (Candidate.findOne as jest.Mock).mockResolvedValue(mockCandidate);
+                (Application.findOne as jest.Mock).mockResolvedValue(mockApplication);
+                (Position.findOne as jest.Mock).mockResolvedValue(mockPosition);
+                (InterviewStep.findOne as jest.Mock).mockResolvedValue(mockInterviewStep);
+                (Employee.findOne as jest.Mock).mockResolvedValue(mockEmployee);
+
+                const mockInterviewInstance = {
+                    save: jest.fn().mockRejectedValue(new Error('Database connection failed'))
+                };
+                (Interview as unknown as jest.Mock).mockImplementation(() => mockInterviewInstance);
+
+                await expect(createInterview(1, validInterviewData)).rejects.toThrow('Database connection failed');
             });
         });
     });

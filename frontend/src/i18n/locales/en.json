@@ -218,7 +218,11 @@
     "updateSuccess": "Interview updated successfully!",
     "deleteSuccess": "Interview deleted successfully.",
     "editInterview": "Edit interview",
-    "deleteInterview": "Delete interview"
+    "deleteInterview": "Delete interview",
+    "createTitle": "Create Interview",
+    "addInterview": "Add interview",
+    "createSuccess": "Interview created successfully",
+    "failedToCreate": "Failed to create interview"
   },
   "fileUploader": {
     "upload": "Upload File",
